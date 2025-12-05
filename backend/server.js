@@ -23,23 +23,30 @@ function generateCode() {
 io.on("connection", (socket) =>{
     console.log("A user connected:", socket.id);
 
-    socket.on("createRoom", () => {
+    socket.on("createRoom", (name) => {
+        socket.playerName = name;
         const roomCode = generateCode();
+
         socket.join(roomCode);
         socket.emit("roomCreated", roomCode);
-        console.log(`${socket.id} created a room: ${roomCode}`);
+
+        console.log(`${socket.playerName} created a room: ${roomCode}`);
     })
 
-    socket.on("joinRoom", (roomCode)=>{
+    socket.on("joinRoom", ({name, roomCode})=>{
         const room = io.sockets.adapter.rooms.get(roomCode);
 
         if(room){
+            socket.playerName = name;
             socket.join(roomCode);
             socket.emit("roomJoined", roomCode);
-            console.log(`${socket.id} joined room: ${roomCode}`);
+
+            console.log(`${socket.playerName} joined room: ${roomCode}`);
         }
         else{
-            socket.emit("errorMessage", "Room not found");
+            socket.emit("errorMessage", "Room Not Found");
+
+            console.log(`Room not found: ${roomCode}`);
         }
     })
 })
