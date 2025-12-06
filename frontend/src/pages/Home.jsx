@@ -1,22 +1,16 @@
-import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import LinkButton from "../components/LinkButton";
 
 function Home() {
-    const navigate = useNavigate();
-
-    function handleCreate() {
-        navigate(`/create`);
-    }
-
-    function handleJoin() {
-        navigate(`/join`);
-    }
-
-    return (
-        <>
-            <button onClick={handleCreate}>Create Room</button>
-            <button onClick={handleJoin}>Join Room</button>
-        </>
-    )
+  return (
+    <>
+      <Navbar />
+      <LinkButton to="/create">
+        Create Room
+      </LinkButton>
+      <LinkButton to="/join">Join Room</LinkButton>
+    </>
+  );
 }
 
-export default Home
+export default Home;
