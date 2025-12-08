@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { socket } from "../utils/socket.js";
 
 import Navbar from "../components/Navbar";
-import ActionButton from "../components/ActionButton";
+import Button from "../components/Button";
 import InputField from "../components/InputField.jsx";
 
 function JoinRoom() {
@@ -62,7 +62,7 @@ function JoinRoom() {
                 <InputField value={code} onChange={handleCodeChange} />
             </div>
 
-            <ActionButton onClick={handleJoin}>Join</ActionButton>
+            <Button onClick={handleJoin}>Join</Button>
         </div>
 
         <p>{errorMessage}</p>

@@ -1,14 +1,16 @@
+import { useNavigate } from "react-router-dom";
+
 import Navbar from "../components/Navbar";
-import LinkButton from "../components/LinkButton";
+import Button from "../components/Button";
 
 function Home() {
+  const navigate = useNavigate();
+
   return (
     <>
       <Navbar />
-      <LinkButton to="/create">
-        Create Room
-      </LinkButton>
-      <LinkButton to="/join">Join Room</LinkButton>
+      <Button onClick={()=>navigate("/create")}>Create Room</Button>
+      <Button onClick={()=>navigate("/join")}>Join Room</Button>
     </>
   );
 }

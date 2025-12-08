@@ -1,20 +1,43 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { socket } from "../utils/socket.js";
 
 import Navbar from "../components/Navbar";
+import Button from "../components/Button";
 
 function Lobby() {
     const { roomCode } = useParams();
+    const navigate = useNavigate();
     const [players, setPlayers] = useState([]);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(()=>{
         socket.emit("requestPlayers", roomCode);
 
         socket.on("roomPlayers", (roomPlayers)=>{
             setPlayers(roomPlayers);
-        })
-    }, [roomCode])
+        });
+
+        socket.on("gameStart", ()=>{
+            navigate(`/game/${roomCode}`);
+        });
+
+        socket.on("errorMessage", (message)=>{
+            setErrorMessage(message)
+        });
+
+        return ()=> {
+            socket.off("requestPlayers");
+            socket.off("roomPlayers");
+            socket.off("gameStart");
+            socket.off("errorMessage");
+        };
+    }, [roomCode, navigate])
+
+    function handleStartGame() {
+        socket.emit("startGame", roomCode);
+
+    }
 
     return (
         <>
@@ -41,6 +64,11 @@ function Lobby() {
                         ))}
                     </ul>
                 </div>
+
+                <div>{errorMessage}</div>
+
+                <Button onClick={handleStartGame}>Start Game</Button>
+                
             </div>
             
         </>
