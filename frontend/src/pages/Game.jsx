@@ -1,19 +1,43 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { socket } from "../utils/socket";
  
 import Navbar from "../components/Navbar";
 import Button from "../components/Button";
 
+import Role from "../components/game/Role";
+import Day from "../components/game/Day";
+
 function Game() {
     const { roomCode } = useParams();
+    const [rolePhase, setRolePhase] = useState(true);
     const [role, setRole] = useState("");
     const [roleVisible, setRoleVisible] = useState(false);
+    const [numReady, setNumReady] = useState(0);
+    const [dayPhase, setDayPhase] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+
+    const totalPlayers = 4;
 
     useEffect(()=>{
         socket.on("roleReveal", (playerRole)=>{
             setRole(playerRole);
+        });
+
+        socket.on("readyStatus", (playersReady)=>{
+            setNumReady(playersReady.length);
+        });
+
+        socket.on("allReady", (phase)=>{
+            setRolePhase(false);
+            setDayPhase(false);
+
+            if(phase === "role"){
+                setRolePhase(true);
+            }
+            else if(phase === "day"){
+                setDayPhase(true);
+            }
         });
 
         socket.on("errorMessage", (message)=>{
@@ -22,14 +46,25 @@ function Game() {
 
         return ()=>{
             socket.off("roleReveal");
+            socket.off("readyStatus");
+            socket.off("allReady");
             socket.off("errorMessage");
         }
 
     }, []);
 
     function handleRoleReveal() {
-        socket.emit("requestRole", roomCode);
-        setRoleVisible(true);
+        if(!roleVisible){
+            socket.emit("requestRole", roomCode);
+            setRoleVisible(true);
+        }
+        else{
+            setRoleVisible(false);
+        }
+    }
+
+    function handleReady() {
+        socket.emit("playerReady", roomCode);
     }
 
     return(
@@ -40,11 +75,19 @@ function Game() {
                     Game Page
                 </div>
 
-                <Button onClick={handleRoleReveal}>Reveal My Role</Button>
+                <Role 
+                    handleRoleReveal={handleRoleReveal}
+                    roleVisible={roleVisible}
+                    role={role}
+                    handleReady={handleReady}
+                    numReady={numReady}
+                    totalPlayers={totalPlayers}
+                    visible={rolePhase}
+                />
 
-                <div className={roleVisible ? "flex" : "hidden"}>
-                    Your Role is {role}
-                </div>
+                <Day
+                    visible={dayPhase}
+                />
 
                 <div>{errorMessage}</div>
             </div>
