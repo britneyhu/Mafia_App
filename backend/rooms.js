@@ -12,6 +12,9 @@ function createRoom(name, socketId) {
             id: socketId, 
             name: name,
             ready: false,
+            alive: true,
+            role: undefined,
+            votes: [],
         }],
     }
 
@@ -22,12 +25,24 @@ function joinRoom(name, roomCode, socketId) {
     if(!rooms[roomCode]) throw new Error("Room not found");
     if(rooms[roomCode].players.length >= 4) throw new Error("Max players in room");
     
-    rooms[roomCode].players.push({id: socketId, name: name});
+    rooms[roomCode].players.push({
+        id: socketId, 
+        name: name,
+        ready: false,
+        alive: true,
+        role: undefined,
+        votes: [],
+    });
     return roomCode;
 }
 
 function getPlayers(roomCode) {
     return rooms[roomCode] ? rooms[roomCode].players : [];
+}
+
+function getAlivePlayers(roomCode) {
+    const players = getPlayers(roomCode);
+    return players.filter(p => p.alive);
 }
 
 function assignRoles(roomCode) {
@@ -52,9 +67,16 @@ function setReady(roomCode, playerId) {
     return players.filter(p => p.ready === true);
 }
 
-function resetReady(roomCode){
+function resetReady(roomCode) {
     const players = getPlayers(roomCode);
     players.forEach(p => p.ready = false);
 }
 
-module.exports = { rooms, createRoom, joinRoom, getPlayers, assignRoles, setReady, resetReady };
+function setVotes(roomCode, voter, voted) {
+    const players = getAlivePlayers(roomCode);
+    
+    const votedPlayer = players.find(p => p.name === voted);
+    votedPlayer.votes.push(voter);
+}
+
+module.exports = { rooms, createRoom, joinRoom, getPlayers, getAlivePlayers, assignRoles, setReady, resetReady, setVotes };
