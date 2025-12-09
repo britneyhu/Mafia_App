@@ -8,7 +8,11 @@ function createRoom(name, socketId) {
     const roomCode = generateCode();
 
     rooms[roomCode] = {
-        players: [{id: socketId, name: name}],
+        players: [{
+            id: socketId, 
+            name: name,
+            ready: false,
+        }],
     }
 
     return roomCode
@@ -36,9 +40,21 @@ function assignRoles(roomCode) {
     }
     
     shuffled[0].role = "Mafia";
-    shuffled.slice(1).forEach(player => player.role = "Villager");
+    shuffled.slice(1).forEach(p => p.role = "Villager");
 
     return shuffled;
 }
 
-module.exports = { rooms, createRoom, joinRoom, getPlayers, assignRoles };
+function setReady(roomCode, playerId) {
+    const players = getPlayers(roomCode);
+    const player = players.find(p => p.id === playerId);
+    player.ready = true;
+    return players.filter(p => p.ready === true);
+}
+
+function resetReady(roomCode){
+    const players = getPlayers(roomCode);
+    players.forEach(p => p.ready = false);
+}
+
+module.exports = { rooms, createRoom, joinRoom, getPlayers, assignRoles, setReady, resetReady };

@@ -3,6 +3,7 @@ const handleJoinRoom = require("./handleJoinRoom");
 const handleRequestPlayers = require("./handleRequestPlayers");
 const handleStartGame = require("./handleStartGame");
 const handleRoleReveal = require("./handleRoleReveal");
+const handlePlayersReady = require("./handlePlayersReady");
 
 function setupSocket(io) {
     io.on("connection", (socket) =>{
@@ -13,6 +14,7 @@ function setupSocket(io) {
         handleRequestPlayers(socket, io);
         handleStartGame(socket, io);
         handleRoleReveal(socket, io);
+        handlePlayersReady(socket, io);
     });
 }
 
