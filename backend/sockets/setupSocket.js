@@ -2,8 +2,8 @@ const handleCreateRoom = require("./handleCreateRoom");
 const handleJoinRoom = require("./handleJoinRoom");
 const handleRequestPlayers = require("./handleRequestPlayers");
 const handleStartGame = require("./handleStartGame");
-const handleRoleReveal = require("./handleRoleReveal");
-const handlePlayersReady = require("./handlePlayersReady");
+const handleRolePhase = require("./handleRolePhase");
+const handleDayPhase = require("./handleDayPhase");
 
 function setupSocket(io) {
     io.on("connection", (socket) =>{
@@ -13,8 +13,8 @@ function setupSocket(io) {
         handleJoinRoom(socket, io);
         handleRequestPlayers(socket, io);
         handleStartGame(socket, io);
-        handleRoleReveal(socket, io);
-        handlePlayersReady(socket, io);
+        handleRolePhase(socket, io);
+        handleDayPhase(socket, io);
     });
 }
 
