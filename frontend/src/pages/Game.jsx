@@ -3,19 +3,19 @@ import { useParams, useNavigate } from "react-router-dom";
 import { socket } from "../utils/socket";
  
 import Navbar from "../components/Navbar";
-import Button from "../components/Button";
 
 import Role from "../components/game/Role";
 import Day from "../components/game/Day";
+import Vote from "../components/game/Vote";
 
 function Game() {
     const { roomCode } = useParams();
-    const [rolePhase, setRolePhase] = useState(true);
+    const [phase, setPhase] = useState("role");
     const [role, setRole] = useState("");
     const [roleVisible, setRoleVisible] = useState(false);
     const [numReady, setNumReady] = useState(0);
-    const [dayPhase, setDayPhase] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [time, setTime] = useState("");
 
     const totalPlayers = 4;
 
@@ -28,17 +28,26 @@ function Game() {
             setNumReady(playersReady.length);
         });
 
-        socket.on("allReady", (phase)=>{
-            setRolePhase(false);
-            setDayPhase(false);
+        socket.on("allReady", (newPhase)=>{
+            setNumReady(0);
 
-            if(phase === "role"){
-                setRolePhase(true);
+            if(newPhase === "rolePhase"){
+                setPhase("rolePhase");
             }
-            else if(phase === "day"){
-                setDayPhase(true);
+            
+            if(newPhase === "dayPhase"){
+                socket.emit("dayPhase", roomCode, 180);
+                setPhase("dayPhase");
+            }
+
+            if(newPhase === "votePhase"){
+                setPhase("votePhase");
             }
         });
+
+        socket.on("dayTimer", (timeLeft)=> {
+            setTime(timeLeft);
+        })
 
         socket.on("errorMessage", (message)=>{
             setErrorMessage(message);
@@ -63,8 +72,12 @@ function Game() {
         }
     }
 
-    function handleReady() {
-        socket.emit("playerReady", roomCode);
+    function handleRoleReady() {
+        socket.emit("roleReady", roomCode);
+    }
+
+    function handleSkipDay() {
+        socket.emit("skipDay", roomCode);
     }
 
     return(
@@ -79,14 +92,22 @@ function Game() {
                     handleRoleReveal={handleRoleReveal}
                     roleVisible={roleVisible}
                     role={role}
-                    handleReady={handleReady}
+                    handleRoleReady={handleRoleReady}
                     numReady={numReady}
                     totalPlayers={totalPlayers}
-                    visible={rolePhase}
+                    phase={phase}
                 />
 
                 <Day
-                    visible={dayPhase}
+                    phase={phase}
+                    time={time}
+                    numReady={numReady}
+                    totalPlayers={totalPlayers}
+                    handleSkipDay={handleSkipDay}
+                />
+
+                <Vote
+                    phase={phase}
                 />
 
                 <div>{errorMessage}</div>
