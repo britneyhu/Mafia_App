@@ -10,7 +10,7 @@ function Day({ phase, time, numReady, totalPlayers, handleSkipDay }) {
             </div>
 
             <Button onClick={handleSkipDay}>Skip</Button>
-            <div>{numReady + "/" + totalPlayers + " Ready"}</div>
+            <div>{numReady + "/" + totalPlayers + " Skipped"}</div>
         </div>
     )
 }

@@ -1,7 +1,33 @@
-function Vote({ phase }) {
+import Button from "../Button";
+
+function Vote({ phase, alivePlayers, numReady, totalPlayers, handleVote, skipResults, handleVoteReady }) {
     return(
-        <div className={phase === "votePhase" ? "flex flex-col justify-center items-center" : "hidden"}>
+        <div className={phase === "votePhase" || phase === "voteResultsPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
             Vote Phase
+
+            <ul>
+                {alivePlayers.map(player => (
+                    <>
+                        <Button key={player.id} onClick={()=>handleVote(player.name)}>{player.name}</Button>
+                        {player.votes.map(vote => (
+                            <div className={phase === "voteResultsPhase" ? "flex" : "hidden"}>
+                                Votes: {vote},
+                            </div>
+                        ))}
+                    </>
+                ))}
+            </ul>
+
+            <Button onClick={()=>handleVote("skip")} value="skip">Skip</Button>
+
+            <div className={phase === "voteResultsPhase" ? "flex" : "hidden"}>
+                {skipResults}
+            </div>
+
+            <div className={phase === "votePhase" ? "flex" : "hidden"}>{numReady + "/" + totalPlayers + " Ready"}</div>
+        
+            <Button className={phase === "voteResultsPhase" ? "flex" : "hidden"} onClick={handleVoteReady}>Next</Button>
+            <div className={phase === "voteResultsPhase" ? "flex" : "hidden"}>{numReady + "/" + totalPlayers + " Ready"}</div>
         </div>
     )
 }

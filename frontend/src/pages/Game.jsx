@@ -7,6 +7,7 @@ import Navbar from "../components/Navbar";
 import Role from "../components/game/Role";
 import Day from "../components/game/Day";
 import Vote from "../components/game/Vote";
+import Night from "../components/game/Night";
 
 function Game() {
     const { roomCode } = useParams();
@@ -16,6 +17,8 @@ function Game() {
     const [numReady, setNumReady] = useState(0);
     const [errorMessage, setErrorMessage] = useState("");
     const [time, setTime] = useState("");
+    const [alivePlayers, setAlivePlayers] = useState([]);
+    const [skipResults, setSkipResults] = useState([]);
 
     const totalPlayers = 4;
 
@@ -41,12 +44,36 @@ function Game() {
             }
 
             if(newPhase === "votePhase"){
+                socket.emit("votePhase", roomCode);
                 setPhase("votePhase");
+            }
+
+            if(newPhase === "voteResultsPhase"){
+                socket.emit("voteResultsPhase", roomCode);
+                setPhase("voteResultsPhase");
+            }
+
+
+            if(newPhase === "nightPhase"){
+                socket.emit("nightPhase");
+                setPhase("nightPhase");
             }
         });
 
         socket.on("dayTimer", (timeLeft)=> {
             setTime(timeLeft);
+        });
+
+        socket.on("alivePlayers", (players)=> {
+            setAlivePlayers(players);
+        })
+
+        socket.on("voteResults", (players)=> {
+            setAlivePlayers(players);
+        });
+
+        socket.on("skipResults", (skips)=> {
+            setSkipResults(skips);
         })
 
         socket.on("errorMessage", (message)=>{
@@ -80,6 +107,14 @@ function Game() {
         socket.emit("skipDay", roomCode);
     }
 
+    function handleVote(voted) {
+        socket.emit("vote", voted, roomCode);
+    }
+
+    function handleVoteReady() {
+        socket.emit("voteReady", roomCode);
+    }
+
     return(
         <>
             <Navbar/>
@@ -107,6 +142,16 @@ function Game() {
                 />
 
                 <Vote
+                    phase={phase}
+                    alivePlayers={alivePlayers}
+                    numReady={numReady}
+                    totalPlayers={totalPlayers}
+                    handleVote={handleVote}
+                    skipResults={skipResults}
+                    handleVoteReady={handleVoteReady}
+                />
+
+                <Night
                     phase={phase}
                 />
 
