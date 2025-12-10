@@ -11,14 +11,14 @@ function Vote({ phase, alivePlayers, numReady, totalPlayers, handleVote, skipRes
 
             <ul>
                 {alivePlayers.map(player => (
-                    <>
+                    <div key={player.id}>
                         <Button key={player.id} onClick={()=>handleVote(player.name)}>{player.name}</Button>
                         {player.votes.map((vote, index) => (
                             <div key={index} className={phase === "voteResultsPhase" ? "flex" : "hidden"}>
                                 Votes: {vote},
                             </div>
                         ))}
-                    </>
+                    </div>
                 ))}
             </ul>
 

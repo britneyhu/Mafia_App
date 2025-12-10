@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { socket } from "../utils/socket";
  
 import Navbar from "../components/Navbar";
@@ -27,77 +27,79 @@ function Game() {
     const totalPlayers = 4;
 
     useEffect(()=>{
-        socket.on("roleReveal", (playerRole)=>{
-            setRole(playerRole);
-        });
-
-        socket.on("readyStatus", (playersReady)=>{
-            setNumReady(playersReady.length);
-        });
-
+        {/* Phase Sockets */}
         socket.on("allReady", (newPhase)=>{
             setNumReady(0);
-
             if(newPhase === "rolePhase"){
                 setPhase("rolePhase");
             }
-            
             if(newPhase === "dayPhase"){
                 socket.emit("dayPhase", roomCode, 180);
                 setPhase("dayPhase");
             }
-
             if(newPhase === "votePhase"){
                 socket.emit("votePhase", roomCode);
                 setPhase("votePhase");
             }
-
             if(newPhase === "voteResultsPhase"){
                 socket.emit("voteResultsPhase", roomCode);
                 setPhase("voteResultsPhase");
             }
-
-
             if(newPhase === "nightPhase"){
-                socket.emit("nightPhase");
+                socket.emit("nightPhase", roomCode);
                 setPhase("nightPhase");
             }
+            if(newPhase === "nightResultsPhase"){
+                socket.emit("nightResultsPhase", roomCode);
+                setPhase("nightResultsPhase");
+            }
+        });
+        socket.on("endPhase", (winnerTeam)=> {
+            setWinner(winnerTeam);
+            setPhase("endPhase");
         });
 
+
+        {/* Day Phase Sockets */}
         socket.on("dayTimer", (timeLeft)=> {
             setTime(timeLeft);
         });
 
-        socket.on("alivePlayers", (players)=> {
-            setAlivePlayers(players);
-        })
 
+        {/* Vote Phase Sockets */}
         socket.on("voteResults", (players)=> {
             setAlivePlayers(players);
         });
-
         socket.on("skipResults", (skips)=> {
             setSkipResults(skips);
         });
-
         socket.on("killed", (killedPlayer)=>{
             setKilled(killedPlayer.name);
         });
-
-        socket.on("dead", ()=>{
-            setAlive(false);
-
+        socket.on("roleReveal", (playerRole)=>{
+            setRole(playerRole);
         });
 
-        socket.on("endPhase", (winnerTeam)=> {
-            setWinner(winnerTeam);
-            setPhase("endPhase");
-        })
 
+        {/* Tool Sockets */}
+        socket.on("readyStatus", (playersReady)=>{
+            setNumReady(playersReady.length);
+        });
+        socket.on("alivePlayers", (players)=> {
+            setAlivePlayers(players);
+        })
+        socket.on("dead", ()=>{
+            setAlive(false);
+        });
+
+        
+        {/* Error Sockets */}
         socket.on("errorMessage", (message)=>{
             setErrorMessage(message);
         });
 
+
+        {/* Socket Offs */}
         return ()=>{
             socket.off("roleReveal");
             socket.off("readyStatus");
@@ -112,6 +114,7 @@ function Game() {
 
     }, []);
 
+    {/* Role Phase Handlers */}
     function handleRoleReveal() {
         if(!roleVisible){
             socket.emit("requestRole", roomCode);
@@ -121,21 +124,29 @@ function Game() {
             setRoleVisible(false);
         }
     }
-
     function handleRoleReady() {
         socket.emit("roleReady", roomCode);
     }
 
+    {/* Day Phase Handlers */}
     function handleSkipDay() {
         socket.emit("skipDay", roomCode);
     }
 
+    {/* Vote Phase Handlers */}
     function handleVote(voted) {
         socket.emit("vote", voted, roomCode);
     }
-
     function handleVoteReady() {
         socket.emit("voteReady", roomCode);
+    }
+
+    {/* Night Phase Handlers */}
+    function handleSurveySubmit(answer) {
+        socket.emit("surveySubmit", answer, roomCode);
+    }
+    function handleMafiaKill(player) {
+        socket.emit("mafiaKill", player, roomCode);
     }
 
     return(
@@ -181,6 +192,12 @@ function Game() {
 
                 <Night
                     phase={phase}
+                    role={role}
+                    numReady={numReady}
+                    totalPlayers={totalPlayers}
+                    handleSurveySubmit={handleSurveySubmit}
+                    handleMafiaKill={handleMafiaKill}
+                    alivePlayers={alivePlayers}
                 />
 
                 <End
