@@ -8,6 +8,7 @@ import Role from "../components/game/Role";
 import Day from "../components/game/Day";
 import Vote from "../components/game/Vote";
 import Night from "../components/game/Night";
+import End from "../components/game/End";
 
 function Game() {
     const { roomCode } = useParams();
@@ -19,6 +20,9 @@ function Game() {
     const [time, setTime] = useState("");
     const [alivePlayers, setAlivePlayers] = useState([]);
     const [skipResults, setSkipResults] = useState([]);
+    const [killed, setKilled] = useState("")
+    const [alive, setAlive] = useState(true);
+    const [winner, setWinner] = useState("");
 
     const totalPlayers = 4;
 
@@ -74,6 +78,20 @@ function Game() {
 
         socket.on("skipResults", (skips)=> {
             setSkipResults(skips);
+        });
+
+        socket.on("killed", (killedPlayer)=>{
+            setKilled(killedPlayer.name);
+        });
+
+        socket.on("dead", ()=>{
+            setAlive(false);
+
+        });
+
+        socket.on("endPhase", (winnerTeam)=> {
+            setWinner(winnerTeam);
+            setPhase("endPhase");
         })
 
         socket.on("errorMessage", (message)=>{
@@ -84,6 +102,11 @@ function Game() {
             socket.off("roleReveal");
             socket.off("readyStatus");
             socket.off("allReady");
+            socket.off("dayTimer");
+            socket.off("alivePlayers");
+            socket.off("voteResults");
+            socket.off("skipResults");
+            socket.off("killed");
             socket.off("errorMessage");
         }
 
@@ -123,6 +146,10 @@ function Game() {
                     Game Page
                 </div>
 
+                <div className={alive ? "hidden" : "flex"}>
+                    Spectating
+                </div>
+
                 <Role 
                     handleRoleReveal={handleRoleReveal}
                     roleVisible={roleVisible}
@@ -149,10 +176,16 @@ function Game() {
                     handleVote={handleVote}
                     skipResults={skipResults}
                     handleVoteReady={handleVoteReady}
+                    killed={killed}
                 />
 
                 <Night
                     phase={phase}
+                />
+
+                <End
+                    phase={phase}
+                    winner={winner}
                 />
 
                 <div>{errorMessage}</div>
