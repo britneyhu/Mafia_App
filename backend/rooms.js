@@ -15,7 +15,8 @@ function createRoom(name, socketId) {
             alive: true,
             role: undefined,
             votes: [],
-            voted: false,
+            surveys: [],
+            kills: [],
         }],
     }
 
@@ -33,7 +34,8 @@ function joinRoom(name, roomCode, socketId) {
         alive: true,
         role: undefined,
         votes: [],
-        voted: false,
+        surveys: [],
+        kills: [],
     });
     return roomCode;
 }
@@ -91,11 +93,19 @@ function resetVotes(roomCode) {
     });
 }
 
-function killPlayer(roomCode, player) {
+function killPlayer(roomCode, playerName, playerId) {
     const players = getPlayers(roomCode);
-    const killedPlayer = players.find(p => p.id === player.id);
+    const player = players.find(p => p.id === playerId);
+    const killedPlayer = players.find(p => p.name === playerName);
     killedPlayer.alive = false;
+    player.kills.push(killedPlayer);
     
+}
+
+function setSurvey(roomCode, answer, playerId) {
+    const players = getPlayers(roomCode);
+    const player = players.find(p => p.id === playerId);
+    player.surveys.push(answer);
 }
 
 module.exports = { 
@@ -109,5 +119,6 @@ module.exports = {
     resetReady, 
     setVotes,
     resetVotes,
-    killPlayer
+    killPlayer,
+    setSurvey,
 };

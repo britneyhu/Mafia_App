@@ -11,7 +11,6 @@ function handleDayPhase(socket, io) {
         let timeLeft = duration;
 
         const interval = setInterval(()=> {
-            console.log(timeLeft);
             io.to(roomCode).emit("dayTimer", timeLeft);
             timeLeft--;
 

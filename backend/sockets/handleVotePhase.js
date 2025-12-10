@@ -12,7 +12,7 @@ function handleVotePhase(socket, io) {
         try{
             const players = getAlivePlayers(roomCode);
             const voterObject = players.find(p => p.id === socket.id);
-            if(voterObject.voted) throw new Error(`voter already voted`);
+            if(voterObject.ready) throw new Error(`voter already voted`);
             
             if(voted === "skip"){
                 if(!roomSkips[roomCode]){
@@ -56,7 +56,7 @@ function handleVotePhase(socket, io) {
         else{
             io.to(roomCode).emit("killed", maxVotedPlayers[0]);
             io.to(maxVotedPlayers[0].id).emit("dead");
-            killPlayer(roomCode, maxVotedPlayers[0]);
+            killPlayer(roomCode, maxVotedPlayers[0].name);
         }
 
         io.to(roomCode).emit("voteResults", players);

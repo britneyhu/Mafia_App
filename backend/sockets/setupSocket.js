@@ -5,6 +5,7 @@ const handleStartGame = require("./handleStartGame");
 const handleRolePhase = require("./handleRolePhase");
 const handleDayPhase = require("./handleDayPhase");
 const handleVotePhase = require("./handleVotePhase");
+const handleNightPhase = require("./handleNightPhase");
 
 function setupSocket(io) {
     io.on("connection", (socket) =>{
@@ -17,6 +18,7 @@ function setupSocket(io) {
         handleRolePhase(socket, io);
         handleDayPhase(socket, io);
         handleVotePhase(socket, io);
+        handleNightPhase(socket, io);
     });
 }
 
