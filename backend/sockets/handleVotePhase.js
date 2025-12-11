@@ -1,16 +1,20 @@
-const { setReady, getPlayers, getAlivePlayers, resetReady, setVotes, resetVotes, voteOffPlayer } = require("../rooms");
+const { setReady, getPlayers, getAlivePlayers, setVotes, resetVotes, voteOffPlayer } = require("../rooms");
 
 const roomSkips = {};
 
 function handleVotePhase(socket, io) {
     socket.on("votePhase", (roomCode)=> {
+        const players = getPlayers(roomCode);
+        const votablePlayers = players.filter(p => p.alive && p.id !== socket.id);
         const alivePlayers = getAlivePlayers(roomCode);
-        io.to(roomCode).emit("alivePlayers", alivePlayers);
+
+        io.to(roomCode).emit("votablePlayers", votablePlayers);
+        io.to(roomCode).emit("alivePlayers", alivePlayers.length);
     });
 
     socket.on("vote", (voted, roomCode)=> {
         try{
-            const players = getAlivePlayers(roomCode);
+            const players = getPlayers(roomCode);
             const voterObject = players.find(p => p.id === socket.id);
             if(voterObject.ready) throw new Error(`voter already voted`);
             
@@ -25,10 +29,10 @@ function handleVotePhase(socket, io) {
             }
 
             const playersReady = setReady(roomCode, socket.id);
-            const totalPlayers = getAlivePlayers(roomCode).length;
+            const alivePlayers = getAlivePlayers(roomCode);
             io.to(roomCode).emit("readyStatus", playersReady);
 
-            if(playersReady.length === totalPlayers){
+            if(playersReady.length === alivePlayers.length){
                 io.to(roomCode).emit("allReady", "voteResultsPhase");
             }
         }
@@ -40,10 +44,10 @@ function handleVotePhase(socket, io) {
     });
 
     socket.on("voteResultsPhase", (roomCode)=> {
-        const players = getPlayers(roomCode);
-        const numVotes = players.reduce((sum, p) => sum + p.votes.length, 0);
-        const maxVotes = Math.max(...players.map(p => p.votes.length));
-        const maxVotedPlayers = players.filter(p => p.votes.length === maxVotes);
+        const votingPlayers = getAlivePlayers(roomCode);
+        const numVotes = votingPlayers.reduce((sum, p) => sum + p.votes.length, 0);
+        const maxVotes = Math.max(...votingPlayers.map(p => p.votes.length));
+        const maxVotedPlayers = votingPlayers.filter(p => p.votes.length === maxVotes);
         const skips = roomSkips[roomCode] || [];
         
         if(maxVotedPlayers.length > 1){
@@ -58,9 +62,10 @@ function handleVotePhase(socket, io) {
             voteOffPlayer(roomCode, maxVotedPlayers[0].name);
         }
 
-        io.to(roomCode).emit("voteResults", players);
+        io.to(roomCode).emit("voteResults", votingPlayers);
         io.to(roomCode).emit("skipResults", skips);
 
+        const players = getPlayers(roomCode);
         const mafia = players.find(p => p.role === "Mafia");
         const villagers = players.filter(p => p.role === "Villager" && p.alive);
 
@@ -74,8 +79,8 @@ function handleVotePhase(socket, io) {
             else{
                 io.to(roomCode).emit("allReady", "nightPhase");
             }
-            resetReady(roomCode);
             resetVotes(roomCode);
+            roomSkips[roomCode] = [];
         }, 5000);
     });
 }

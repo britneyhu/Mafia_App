@@ -1,4 +1,4 @@
-const { setReady, getPlayers, resetReady } = require("../rooms");
+const { setReady, getPlayers, getAlivePlayers, resetReady } = require("../rooms");
 
 function handleRolePhase(socket, io) {
     socket.on("requestRole", (roomCode)=>{
@@ -18,11 +18,11 @@ function handleRolePhase(socket, io) {
     
     socket.on("roleReady", (roomCode)=>{
         const playersReady = setReady(roomCode, socket.id);
-        const totalPlayers = getPlayers(roomCode).length;
+        const alivePlayers = getAlivePlayers(roomCode);
 
         io.to(roomCode).emit("readyStatus", playersReady);
 
-        if(playersReady.length === totalPlayers){
+        if(playersReady.length === alivePlayers.length){
             io.to(roomCode).emit("allReady", "dayPhase");
             resetReady(roomCode);
         }

@@ -48,11 +48,6 @@ function getPlayers(roomCode) {
     return rooms[roomCode] ? rooms[roomCode].players : [];
 }
 
-function getAlivePlayers(roomCode) {
-    const players = getPlayers(roomCode);
-    return players.filter(p => p.alive);
-}
-
 function assignRoles(roomCode) {
     const players = getPlayers(roomCode);
 
@@ -124,12 +119,17 @@ function setSurvey(roomCode, answer, playerId) {
     player.surveys.push(answer);
 }
 
+function getAlivePlayers(roomCode) {
+    const players = getPlayers(roomCode);
+    const alivePlayers = players.filter(p => p.alive);
+    return alivePlayers;
+}
+
 module.exports = { 
     rooms, 
     createRoom, 
     joinRoom, 
     getPlayers, 
-    getAlivePlayers, 
     assignRoles, 
     setReady, 
     resetReady, 
@@ -139,4 +139,5 @@ module.exports = {
     setSurvey,
     resetCurrentKill,
     voteOffPlayer,
+    getAlivePlayers,
 };

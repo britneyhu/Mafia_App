@@ -1,9 +1,11 @@
-const { setReady, getPlayers, resetReady } = require("../rooms");
+const { setReady, getPlayers, getAlivePlayers, resetReady } = require("../rooms");
 
 const roomTimers = {};
 
 function handleDayPhase(socket, io) {
     socket.on("dayPhase", (roomCode, duration)=> {
+        const alivePlayers = getAlivePlayers(roomCode);
+        socket.emit("alivePlayers", alivePlayers.length);
         if(roomTimers[roomCode]) {
             clearInterval(roomTimers[roomCode]);
         }
@@ -28,11 +30,14 @@ function handleDayPhase(socket, io) {
 
     socket.on("skipDay", (roomCode)=> {
         const playersReady = setReady(roomCode, socket.id);
-        const totalPlayers = getPlayers(roomCode).length;
+        const alivePlayers = getAlivePlayers(roomCode);
+        const players = getPlayers(roomCode);
+        const playerObject = players.find(p => p.id === socket.id);
+        if(playerObject.ready) throw new Error(`Player Skipped Already`);
 
         io.to(roomCode).emit("readyStatus", playersReady);
 
-        if(playersReady.length === totalPlayers){
+        if(playersReady.length === alivePlayers.length){
             if(roomTimers[roomCode]){
                 clearInterval(roomTimers[roomCode]);
                 delete roomTimers[roomCode];

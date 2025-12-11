@@ -3,11 +3,13 @@ const { getPlayers, getAlivePlayers, killPlayer, resetCurrentKill, setReady, res
 function handleNightPhase(socket, io) {
     socket.on("nightPhase", (roomCode)=>{
         const players = getPlayers(roomCode);
-        const player = players.find(player => player.id === socket.id);
+        const player = players.find(p => p.id === socket.id);
+        const killablePlayers = players.filter(p => p.alive && p.id !== socket.id);
         const alivePlayers = getAlivePlayers(roomCode);
-        alivePlayers.filter(p => p.id !== socket.id);
+
         socket.emit("roleReveal", player.role);
-        socket.emit("alivePlayers", alivePlayers);
+        socket.emit("killablePlayers", killablePlayers);
+        socket.emit("alivePlayers", alivePlayers.length);
 
     });
 
@@ -19,10 +21,10 @@ function handleNightPhase(socket, io) {
             setSurvey(roomCode, answer, socket.id);
 
             const playersReady = setReady(roomCode, socket.id);
-            const totalPlayers = getPlayers(roomCode).length;
+            const alivePlayers = getAlivePlayers(roomCode);
             io.to(roomCode).emit("readyStatus", playersReady);
 
-            if(playersReady.length === totalPlayers){
+            if(playersReady.length === alivePlayers.length){
                 io.to(roomCode).emit("allReady", "nightResultsPhase");
                 resetReady(roomCode);
             }
@@ -38,13 +40,14 @@ function handleNightPhase(socket, io) {
             const players = getPlayers(roomCode);
             const playerObject = players.find(p => p.id === socket.id);
             if(playerObject.ready) throw new Error(`Player already killed`);
+
             killPlayer(roomCode, player, socket.id);
 
             const playersReady = setReady(roomCode, socket.id);
-            const totalPlayers = getPlayers(roomCode).length;
+            const alivePlayers = getAlivePlayers(roomCode);
             io.to(roomCode).emit("readyStatus", playersReady);
 
-            if(playersReady.length === totalPlayers){
+            if(playersReady.length === alivePlayers.length){
                 io.to(roomCode).emit("allReady", "nightResultsPhase");
                 resetReady(roomCode);
             }
