@@ -1,12 +1,12 @@
 import Button from "../Button";
 
-function Vote({ phase, alivePlayers, numReady, totalPlayers, handleVote, skipResults, handleVoteReady, killed }) {
+function Vote({ phase, alivePlayers, numReady, totalPlayers, handleVote, skipResults, votedOff }) {
     return(
         <div className={phase === "votePhase" || phase === "voteResultsPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
             Vote Phase
 
             <div className={phase === "voteResultsPhase" ? "flex" : "hidden"}>
-                {killed} Has Been Voted Off
+                {votedOff} Has Been Voted Off
             </div>
 
             <ul>
@@ -29,9 +29,7 @@ function Vote({ phase, alivePlayers, numReady, totalPlayers, handleVote, skipRes
             </div>
 
             <div className={phase === "votePhase" ? "flex" : "hidden"}>{numReady + "/" + totalPlayers + " Ready"}</div>
-        
-            <Button className={phase === "voteResultsPhase" ? "flex" : "hidden"} onClick={handleVoteReady}>Next</Button>
-            <div className={phase === "voteResultsPhase" ? "flex" : "hidden"}>{numReady + "/" + totalPlayers + " Ready"}</div>
+
         </div>
     )
 }

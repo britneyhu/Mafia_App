@@ -20,7 +20,8 @@ function Game() {
     const [time, setTime] = useState("");
     const [alivePlayers, setAlivePlayers] = useState([]);
     const [skipResults, setSkipResults] = useState([]);
-    const [killed, setKilled] = useState("")
+    const [votedOff, setVotedOff] = useState("");
+    const [killed, setKilled] = useState("");
     const [alive, setAlive] = useState(true);
     const [winner, setWinner] = useState("");
 
@@ -52,6 +53,7 @@ function Game() {
             if(newPhase === "nightResultsPhase"){
                 socket.emit("nightResultsPhase", roomCode);
                 setPhase("nightResultsPhase");
+
             }
         });
         socket.on("endPhase", (winnerTeam)=> {
@@ -73,12 +75,19 @@ function Game() {
         socket.on("skipResults", (skips)=> {
             setSkipResults(skips);
         });
-        socket.on("killed", (killedPlayer)=>{
-            setKilled(killedPlayer.name);
+        socket.on("votedOff", (player)=>{
+            console.log(player);
+            setVotedOff(player);
         });
         socket.on("roleReveal", (playerRole)=>{
             setRole(playerRole);
         });
+
+
+        {/* Night Phase Sockets */}
+        socket.on("killed", (result)=> {
+            setKilled(result);
+        })
 
 
         {/* Tool Sockets */}
@@ -109,6 +118,7 @@ function Game() {
             socket.off("voteResults");
             socket.off("skipResults");
             socket.off("killed");
+            socket.off("votedOff");
             socket.off("errorMessage");
         }
 
@@ -136,9 +146,6 @@ function Game() {
     {/* Vote Phase Handlers */}
     function handleVote(voted) {
         socket.emit("vote", voted, roomCode);
-    }
-    function handleVoteReady() {
-        socket.emit("voteReady", roomCode);
     }
 
     {/* Night Phase Handlers */}
@@ -186,8 +193,7 @@ function Game() {
                     totalPlayers={totalPlayers}
                     handleVote={handleVote}
                     skipResults={skipResults}
-                    handleVoteReady={handleVoteReady}
-                    killed={killed}
+                    votedOff={votedOff}
                 />
 
                 <Night
@@ -198,6 +204,7 @@ function Game() {
                     handleSurveySubmit={handleSurveySubmit}
                     handleMafiaKill={handleMafiaKill}
                     alivePlayers={alivePlayers}
+                    killed={killed}
                 />
 
                 <End
