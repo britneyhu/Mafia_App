@@ -1,4 +1,4 @@
-const { getPlayers, getAlivePlayers, killPlayer, setReady, resetReady, setSurvey } = require("../rooms");
+const { getPlayers, getAlivePlayers, killPlayer, resetCurrentKill, setReady, resetReady, setSurvey } = require("../rooms");
 
 function handleNightPhase(socket, io) {
     socket.on("nightPhase", (roomCode)=>{
@@ -53,7 +53,43 @@ function handleNightPhase(socket, io) {
             socket.emit("errorMessage", err.message);
             console.error(err)
         }
-    })
+    });
+
+    socket.on("nightResultsPhase", (roomCode)=> {
+        try{
+            const players = getPlayers(roomCode);
+            const mafia = players.find(p => p.role === "Mafia");
+            const villagers = players.filter(p => p.role === "Villager" && p.alive);
+            const killed = players.find(p => p.name === mafia.currentKill);
+
+            if(!mafia.currentKill){
+                io.to(roomCode).emit("killed", "No one");
+            }
+            else{
+                io.to(roomCode).emit("killed", mafia.currentKill);
+                io.to(killed.id).emit("dead");
+            }
+
+            setTimeout(()=> {
+                if(mafia.alive === false){
+                    io.to(roomCode).emit("endPhase", "Villagers");
+                }
+                else if(villagers.length === 1){
+                    io.to(roomCode).emit("endPhase", "Mafia");
+                }
+                else{
+                    io.to(roomCode).emit("allReady", "dayPhase");
+                }
+                resetCurrentKill(roomCode, mafia.id);
+            }, 5000);
+
+            
+        }
+        catch(err){
+            socket.emit("errorMessage", err.message);
+            console.error(err);
+        }
+    });
 }
 
 module.exports = handleNightPhase;

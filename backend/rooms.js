@@ -15,8 +15,10 @@ function createRoom(name, socketId) {
             alive: true,
             role: undefined,
             votes: [],
+            voted: [],
             surveys: [],
-            kills: [],
+            currentKill: false,
+            killed: [],
         }],
     }
 
@@ -34,8 +36,10 @@ function joinRoom(name, roomCode, socketId) {
         alive: true,
         role: undefined,
         votes: [],
+        voted: [],
         surveys: [],
-        kills: [],
+        currentKill: false,
+        killed: [],
     });
     return roomCode;
 }
@@ -78,7 +82,7 @@ function resetReady(roomCode) {
 
 function setVotes(roomCode, voterObject, voted) {
     const players = getAlivePlayers(roomCode);
-    voterObject.voted = true;
+    voterObject.voted.push(voted);
 
     const voterName = voterObject.name;
     const votedObject = players.find(p => p.name === voted);
@@ -89,8 +93,14 @@ function resetVotes(roomCode) {
     const players = getPlayers(roomCode);
     players.forEach(p => {
         p.votes = [];
-        p.voted = false;
     });
+}
+
+function voteOffPlayer(roomCode, playerName) {
+    const players = getPlayers(roomCode);
+    const killedPlayer = players.find(p => p.name === playerName);
+    killedPlayer.alive = false;
+    
 }
 
 function killPlayer(roomCode, playerName, playerId) {
@@ -98,8 +108,14 @@ function killPlayer(roomCode, playerName, playerId) {
     const player = players.find(p => p.id === playerId);
     const killedPlayer = players.find(p => p.name === playerName);
     killedPlayer.alive = false;
-    player.kills.push(killedPlayer);
-    
+    player.killed.push(killedPlayer.name);
+    player.currentKill = killedPlayer.name;
+}
+
+function resetCurrentKill(roomCode, playerId) {
+    const players = getPlayers(roomCode);
+    const player = players.find(p => p.id === playerId);
+    player.currentKill = false; 
 }
 
 function setSurvey(roomCode, answer, playerId) {
@@ -121,4 +137,6 @@ module.exports = {
     resetVotes,
     killPlayer,
     setSurvey,
+    resetCurrentKill,
+    voteOffPlayer,
 };

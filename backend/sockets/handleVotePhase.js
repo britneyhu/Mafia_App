@@ -1,4 +1,4 @@
-const { setReady, getPlayers, getAlivePlayers, resetReady, setVotes, resetVotes, killPlayer } = require("../rooms");
+const { setReady, getPlayers, getAlivePlayers, resetReady, setVotes, resetVotes, voteOffPlayer } = require("../rooms");
 
 const roomSkips = {};
 
@@ -30,7 +30,6 @@ function handleVotePhase(socket, io) {
 
             if(playersReady.length === totalPlayers){
                 io.to(roomCode).emit("allReady", "voteResultsPhase");
-                resetReady(roomCode);
             }
         }
         catch(err){
@@ -48,31 +47,24 @@ function handleVotePhase(socket, io) {
         const skips = roomSkips[roomCode] || [];
         
         if(maxVotedPlayers.length > 1){
-            io.to(roomCode).emit("killed", "No One");
+            io.to(roomCode).emit("votedOff", "No One");
         }
         else if(skips.length >= numVotes){
-            io.to(roomCode).emit("killed", "No One");
+            io.to(roomCode).emit("votedOff", "No One");
         }
         else{
-            io.to(roomCode).emit("killed", maxVotedPlayers[0]);
+            io.to(roomCode).emit("votedOff", maxVotedPlayers[0].name);
             io.to(maxVotedPlayers[0].id).emit("dead");
-            killPlayer(roomCode, maxVotedPlayers[0].name);
+            voteOffPlayer(roomCode, maxVotedPlayers[0].name);
         }
 
         io.to(roomCode).emit("voteResults", players);
         io.to(roomCode).emit("skipResults", skips);
-    });
 
-    socket.on("voteReady", (roomCode)=> {
-        const playersReady = setReady(roomCode, socket.id);
-        const totalPlayers = getAlivePlayers(roomCode).length;
-        io.to(roomCode).emit("readyStatus", playersReady);
+        const mafia = players.find(p => p.role === "Mafia");
+        const villagers = players.filter(p => p.role === "Villager" && p.alive);
 
-        if(playersReady.length === totalPlayers){
-            const players = getPlayers(roomCode);
-            const mafia = players.find(p => p.role === "Mafia");
-            const villagers = players.filter(p => p.role === "Villager");
-
+        setTimeout(()=> {
             if(mafia.alive === false){
                 io.to(roomCode).emit("endPhase", "Villagers");
             }
@@ -82,11 +74,10 @@ function handleVotePhase(socket, io) {
             else{
                 io.to(roomCode).emit("allReady", "nightPhase");
             }
-
             resetReady(roomCode);
             resetVotes(roomCode);
-        }
-    })
+        }, 5000);
+    });
 }
 
 module.exports = handleVotePhase;
