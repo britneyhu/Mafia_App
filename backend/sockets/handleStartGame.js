@@ -7,9 +7,6 @@ function handleStartGame(socket, io) {
             if(players.length < 4) throw new Error("Need 4 Players To Start");
             assignRoles(roomCode); 
             io.to(roomCode).emit("gameStart");
-
-            const alivePlayers = getAlivePlayers(roomCode);
-            socket.emit("alivePlayers", alivePlayers.length);
             
         }
         catch(err){
@@ -17,6 +14,11 @@ function handleStartGame(socket, io) {
 
             console.error(err);
         }
+    });
+
+    socket.on("requestAlivePlayers", (roomCode)=> {
+        const alivePlayers = getAlivePlayers(roomCode);
+        socket.emit("alivePlayers", alivePlayers.length);
     })
 }
 

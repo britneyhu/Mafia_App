@@ -3,7 +3,8 @@ const { joinRoom, getPlayers } = require("../rooms");
 function handleJoinRoom(socket, io) {
     socket.on("joinRoom", ({name, roomCode})=>{
         try{
-            joinRoom(name, roomCode, socket.id);
+            const trimmedName = name.trim();
+            joinRoom(trimmedName, roomCode, socket.id);
 
             socket.playerName = name;
             socket.join(roomCode);
@@ -15,6 +16,9 @@ function handleJoinRoom(socket, io) {
         }
         catch(err){
             socket.emit("errorMessage", err.message);
+            setTimeout(()=> {
+                socket.emit("errorMessage", "");
+            }, 3000);
 
             console.error(err);
         }

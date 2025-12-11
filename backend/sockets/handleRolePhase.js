@@ -1,6 +1,7 @@
-const { setReady, getPlayers, getAlivePlayers, resetReady } = require("../rooms");
+const { getPlayers, getAlivePlayers, setRolePhaseReady, resetRolePhaseReady } = require("../rooms");
 
 function handleRolePhase(socket, io) {
+    //When a player requests their role, give them their role
     socket.on("requestRole", (roomCode)=>{
         try{
             const players = getPlayers(roomCode);
@@ -11,21 +12,43 @@ function handleRolePhase(socket, io) {
         }
         catch(err){
             socket.emit("errorMessage", err.message);
+            setTimeout(()=> {
+                socket.emit("errorMessage", "");
+            }, 3000);
+
             console.error(err);
         }
         
     })
     
-    socket.on("roleReady", (roomCode)=>{
-        const playersReady = setReady(roomCode, socket.id);
-        const alivePlayers = getAlivePlayers(roomCode);
+    //When a player presses ready, set them as ready, then update everyone on who is ready
+    //If everyone is ready, reset readys and emit day phase
+    socket.on("rolePhaseReady", (roomCode)=>{
+        try{
+            //Check if player has pressed ready already
+            const players = getPlayers(roomCode);
+            const playerObject = players.find(p => p.id === socket.id);
+            if(playerObject.rolePhaseReady) throw new Error(`Player Pressed Ready Already`);
 
-        io.to(roomCode).emit("readyStatus", playersReady);
+            const playersReady = setRolePhaseReady(roomCode, socket.id);
+            io.to(roomCode).emit("rolePhaseReadyStatus", playersReady);
 
-        if(playersReady.length === alivePlayers.length){
-            io.to(roomCode).emit("allReady", "dayPhase");
-            resetReady(roomCode);
+            const alivePlayers = getAlivePlayers(roomCode);
+
+            if(playersReady.length === alivePlayers.length){
+                io.to(roomCode).emit("rolePhaseAllReady", "dayPhase");
+                resetRolePhaseReady(roomCode);
+            }
         }
+        catch(err){
+            socket.emit("errorMessage", err.message);
+            setTimeout(()=> {
+                socket.emit("errorMessage", "");
+            }, 3000);
+            
+            console.error(err);
+        }
+        
     });
 }
 

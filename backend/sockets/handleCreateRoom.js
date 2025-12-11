@@ -2,10 +2,10 @@ const { createRoom } = require("../rooms");
 
 function handleCreateRoom(socket, io) {
     socket.on("createRoom", (name) => {
-        socket.playerName = name;
-        
         try{
-            const roomCode = createRoom(name, socket.id);
+            const trimmedName = name.trim();
+            socket.playerName = trimmedName;
+            const roomCode = createRoom(trimmedName, socket.id);
             socket.join(roomCode);
             socket.emit("roomCreated", roomCode);
 
