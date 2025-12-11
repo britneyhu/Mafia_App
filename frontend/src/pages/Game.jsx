@@ -28,84 +28,106 @@ function Game() {
     const [alivePlayers, setAlivePlayers] = useState(0);
 
     useEffect(()=>{
-        {/* Phase Sockets */}
-        socket.on("allReady", (newPhase)=>{
-            setNumReady(0);
-            if(newPhase === "rolePhase"){
-                setPhase("rolePhase");
-            }
-            if(newPhase === "dayPhase"){
-                socket.emit("dayPhase", roomCode, 180);
-                setPhase("dayPhase");
-            }
-            if(newPhase === "votePhase"){
-                socket.emit("votePhase", roomCode);
-                setPhase("votePhase");
-            }
-            if(newPhase === "voteResultsPhase"){
-                socket.emit("voteResultsPhase", roomCode);
-                setPhase("voteResultsPhase");
-            }
-            if(newPhase === "nightPhase"){
-                socket.emit("nightPhase", roomCode);
-                setPhase("nightPhase");
-            }
-            if(newPhase === "nightResultsPhase"){
-                socket.emit("nightResultsPhase", roomCode);
-                setPhase("nightResultsPhase");
+        socket.emit("requestAlivePlayers", roomCode);
 
-            }
-        });
+        {/* End Phase Sockets */}
+
         socket.on("endPhase", (winnerTeam)=> {
             setWinner(winnerTeam);
             setPhase("endPhase");
         });
+
+        {/* Role Phase Sockets */}
+        socket.on("rolePhaseReadyStatus", (playersReady)=>{
+            setNumReady(playersReady.length);
+        });
+        socket.on("rolePhaseAllReady", ()=> {
+            setNumReady(0);
+            socket.emit("dayPhase", roomCode, 180);
+            setPhase("dayPhase");
+        })
+
 
 
         {/* Day Phase Sockets */}
         socket.on("dayTimer", (timeLeft)=> {
             setTime(timeLeft);
         });
+        socket.on("dayPhaseReadyStatus", (playersReady)=> {
+            setNumReady(playersReady.length);
+        });
+        socket.on("dayPhaseAllReady", ()=> {
+            setNumReady(0);
+            socket.emit("votePhase", roomCode);
+            setPhase("votePhase");
+        });
 
 
         {/* Vote Phase Sockets */}
+        socket.on("votablePlayers", (players)=> {
+            setVotablePlayers(players);
+        });
+        socket.on("votePhaseReadyStatus", (playersReady)=> {
+            setNumReady(playersReady.length);
+        });
+        socket.on("votePhaseAllReady", ()=> {
+            setNumReady(0);
+            socket.emit("voteResultsPhase", roomCode);
+            setPhase("voteResultsPhase");
+        });
+
+
+        {/* Vote Results Phase Sockets */}
         socket.on("voteResults", (players)=> {
+            setVotablePlayers(players);
             setAlivePlayers(players);
         });
         socket.on("skipResults", (skips)=> {
             setSkipResults(skips);
         });
         socket.on("votedOff", (player)=>{
-            console.log(player);
             setVotedOff(player);
         });
-        socket.on("roleReveal", (playerRole)=>{
-            setRole(playerRole);
+        socket.on("voteResultsAllReady", ()=> {
+            socket.emit("nightPhase", roomCode);
+            setPhase("nightPhase");
         });
-        socket.on("votablePlayers", (players)=> {
-            setVotablePlayers(players);
-        })
 
 
         {/* Night Phase Sockets */}
         socket.on("killablePlayers", (players)=> {
             setKillablePlayers(players);
-        })
+        });
+        socket.on("nightPhaseReadyStatus", (playersReady)=> {
+            setNumReady(playersReady.length);
+        });
+        socket.on("nightPhaseAllReady", ()=> {
+            setNumReady(0);
+            socket.emit("nightResultsPhase", roomCode);
+            setPhase("nightResultsPhase");
+        });
+
+        {/* Night Results Phase Sockets */}
         socket.on("killed", (result)=> {
             setKilled(result);
-        })
+        });
+        socket.on("nightResultsPhaseReady", ()=> {
+            setNumReady(0);
+            socket.emit("dayPhase", roomCode, 180);
+            setPhase("dayPhase");
+        });
 
 
         {/* Tool Sockets */}
-        socket.on("readyStatus", (playersReady)=>{
-            setNumReady(playersReady.length);
-        });
         socket.on("dead", ()=>{
             setAlive(false);
         });
         socket.on("alivePlayers", (players)=> {
             setAlivePlayers(players);
-        })
+        });
+        socket.on("roleReveal", (playerRole)=>{
+            setRole(playerRole);
+        });
 
         
         {/* Error Sockets */}
@@ -116,15 +138,26 @@ function Game() {
 
         {/* Socket Offs */}
         return ()=>{
-            socket.off("roleReveal");
-            socket.off("readyStatus");
-            socket.off("allReady");
+            socket.off("endPhase");
+            socket.off("rolePhaseReadyStatus");
+            socket.off("rolePhaseAllReady");
             socket.off("dayTimer");
-            socket.off("alivePlayers");
+            socket.off("dayPhaseReadyStatus");
+            socket.off("dayPhaseAllReady");
+            socket.off("votablePlayers");
+            socket.off("votePhaseReadyStatus");
+            socket.off("votePhaseAllReady");
             socket.off("voteResults");
             socket.off("skipResults");
-            socket.off("killed");
             socket.off("votedOff");
+            socket.off("voteResultsAllReady");
+            socket.off("killablePlayers");
+            socket.off("nightPhaseReadyStatus");
+            socket.off("nightPhaseAllReady");
+            socket.off("killed");
+            socket.off("dead");
+            socket.off("alivePlayers");
+            socket.off("roleReveal");
             socket.off("errorMessage");
         }
 
@@ -141,7 +174,7 @@ function Game() {
         }
     }
     function handleRoleReady() {
-        socket.emit("roleReady", roomCode);
+        socket.emit("rolePhaseReady", roomCode);
     }
 
     {/* Day Phase Handlers */}
