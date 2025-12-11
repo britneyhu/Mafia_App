@@ -1,6 +1,6 @@
 import Button from "../Button";
 
-function Vote({ phase, alivePlayers, numReady, totalPlayers, handleVote, skipResults, votedOff }) {
+function Vote({ phase, votablePlayers, numReady, alivePlayers, handleVote, skipResults, votedOff }) {
     return(
         <div className={phase === "votePhase" || phase === "voteResultsPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
             Vote Phase
@@ -10,7 +10,7 @@ function Vote({ phase, alivePlayers, numReady, totalPlayers, handleVote, skipRes
             </div>
 
             <ul>
-                {alivePlayers.map(player => (
+                {votablePlayers.map(player => (
                     <div key={player.id}>
                         <Button key={player.id} onClick={()=>handleVote(player.name)}>{player.name}</Button>
                         {player.votes.map((vote, index) => (
@@ -28,7 +28,7 @@ function Vote({ phase, alivePlayers, numReady, totalPlayers, handleVote, skipRes
                 {skipResults}
             </div>
 
-            <div className={phase === "votePhase" ? "flex" : "hidden"}>{numReady + "/" + totalPlayers + " Ready"}</div>
+            <div className={phase === "votePhase" ? "flex" : "hidden"}>{numReady + "/" + alivePlayers + " Ready"}</div>
 
         </div>
     )

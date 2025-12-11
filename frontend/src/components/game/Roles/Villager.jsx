@@ -1,6 +1,6 @@
 import Button from "../../Button";
 
-function Villager({ role, numReady, totalPlayers, handleSurveySubmit }) {
+function Villager({ role, numReady, alivePlayers, handleSurveySubmit }) {
     return (
         <div className={role === "Villager" ? "flex flex-col justify-center items-center" : "hidden"}>
             <div>You are a Villager</div>
@@ -11,7 +11,7 @@ function Villager({ role, numReady, totalPlayers, handleSurveySubmit }) {
             <Button onClick={()=>handleSurveySubmit("Pork")}>Pork</Button>
             <Button onClick={()=>handleSurveySubmit("Lamb")}>Lamb</Button>
 
-            <div>{numReady + "/" + totalPlayers + " Ready"}</div>
+            <div>{numReady + "/" + alivePlayers + " Ready"}</div>
         </div>
     )
 }

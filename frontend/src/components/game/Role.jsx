@@ -1,6 +1,6 @@
 import Button from "../Button";
 
-function Role({ handleRoleReveal, roleVisible, role, handleRoleReady, numReady, totalPlayers, phase }) {
+function Role({ handleRoleReveal, roleVisible, role, handleRoleReady, numReady, alivePlayers, phase }) {
 
     return(
         <div className={phase === "role" ? "flex flex-col justify-center items-center" : "hidden"}>
@@ -12,7 +12,7 @@ function Role({ handleRoleReveal, roleVisible, role, handleRoleReady, numReady, 
 
             <Button onClick={handleRoleReady}>Ready</Button>
 
-            <div>{numReady + "/" + totalPlayers + " Ready"}</div>
+            <div>{numReady + "/" + alivePlayers + " Ready"}</div>
         </div>
     )
 }

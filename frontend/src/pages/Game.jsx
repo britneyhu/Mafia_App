@@ -18,14 +18,14 @@ function Game() {
     const [numReady, setNumReady] = useState(0);
     const [errorMessage, setErrorMessage] = useState("");
     const [time, setTime] = useState("");
-    const [alivePlayers, setAlivePlayers] = useState([]);
     const [skipResults, setSkipResults] = useState([]);
     const [votedOff, setVotedOff] = useState("");
     const [killed, setKilled] = useState("");
     const [alive, setAlive] = useState(true);
     const [winner, setWinner] = useState("");
-
-    const totalPlayers = 4;
+    const [killablePlayers, setKillablePlayers] = useState([]);
+    const [votablePlayers, setVotablePlayers] = useState([]);
+    const [alivePlayers, setAlivePlayers] = useState(0);
 
     useEffect(()=>{
         {/* Phase Sockets */}
@@ -82,9 +82,15 @@ function Game() {
         socket.on("roleReveal", (playerRole)=>{
             setRole(playerRole);
         });
+        socket.on("votablePlayers", (players)=> {
+            setVotablePlayers(players);
+        })
 
 
         {/* Night Phase Sockets */}
+        socket.on("killablePlayers", (players)=> {
+            setKillablePlayers(players);
+        })
         socket.on("killed", (result)=> {
             setKilled(result);
         })
@@ -94,12 +100,12 @@ function Game() {
         socket.on("readyStatus", (playersReady)=>{
             setNumReady(playersReady.length);
         });
-        socket.on("alivePlayers", (players)=> {
-            setAlivePlayers(players);
-        })
         socket.on("dead", ()=>{
             setAlive(false);
         });
+        socket.on("alivePlayers", (players)=> {
+            setAlivePlayers(players);
+        })
 
         
         {/* Error Sockets */}
@@ -174,7 +180,7 @@ function Game() {
                     role={role}
                     handleRoleReady={handleRoleReady}
                     numReady={numReady}
-                    totalPlayers={totalPlayers}
+                    alivePlayers={alivePlayers}
                     phase={phase}
                 />
 
@@ -182,15 +188,15 @@ function Game() {
                     phase={phase}
                     time={time}
                     numReady={numReady}
-                    totalPlayers={totalPlayers}
+                    alivePlayers={alivePlayers}
                     handleSkipDay={handleSkipDay}
                 />
 
                 <Vote
                     phase={phase}
-                    alivePlayers={alivePlayers}
+                    votablePlayers={votablePlayers}
                     numReady={numReady}
-                    totalPlayers={totalPlayers}
+                    alivePlayers={alivePlayers}
                     handleVote={handleVote}
                     skipResults={skipResults}
                     votedOff={votedOff}
@@ -200,10 +206,10 @@ function Game() {
                     phase={phase}
                     role={role}
                     numReady={numReady}
-                    totalPlayers={totalPlayers}
+                    alivePlayers={alivePlayers}
                     handleSurveySubmit={handleSurveySubmit}
                     handleMafiaKill={handleMafiaKill}
-                    alivePlayers={alivePlayers}
+                    killablePlayers={killablePlayers}
                     killed={killed}
                 />
 

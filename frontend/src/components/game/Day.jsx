@@ -1,6 +1,6 @@
 import Button from "../Button";
 
-function Day({ phase, time, numReady, totalPlayers, handleSkipDay }) {
+function Day({ phase, time, numReady, alivePlayers, handleSkipDay }) {
 
     return(
         <div className={phase === "dayPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
@@ -10,7 +10,7 @@ function Day({ phase, time, numReady, totalPlayers, handleSkipDay }) {
             </div>
 
             <Button onClick={handleSkipDay}>Skip</Button>
-            <div>{numReady + "/" + totalPlayers + " Skipped"}</div>
+            <div>{numReady + "/" + alivePlayers + " Skipped"}</div>
         </div>
     )
 }
