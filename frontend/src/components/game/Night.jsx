@@ -1,7 +1,8 @@
 import Villager from "./Roles/Villager";
 import Mafia from "./Roles/Mafia";
+import Doctor from "./Roles/Doctor";
 
-function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], handleSurveySubmit, handleMafiaKill, killed, roundNumber, skipTime }) {
+function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], handleSurveySubmit, handleMafiaKill, killed, roundNumber, skipTime, savablePlayers, handleDoctorSave }) {
     return(
         <div>
             <div className={phase === "nightPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
@@ -20,6 +21,14 @@ function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], hand
                     alivePlayers={alivePlayers}
                     handleMafiaKill={handleMafiaKill}
                     killablePlayers={killablePlayers}
+                />
+
+                <Doctor
+                    role={role}
+                    savablePlayers={savablePlayers}
+                    handleDoctorSave={handleDoctorSave}
+                    numReady={numReady}
+                    alivePlayers={alivePlayers}
                 />
             </div>
 

@@ -28,6 +28,7 @@ function Game() {
     const [votablePlayers, setVotablePlayers] = useState([]);
     const [alivePlayers, setAlivePlayers] = useState(0);
     const [roundNumber, setRoundNumber] = useState(1);
+    const [savablePlayers, setSavablePlayers] = useState([]);
 
     useEffect(()=>{
         socket.emit("requestAlivePlayers", roomCode);
@@ -96,6 +97,9 @@ function Game() {
         socket.on("killablePlayers", (players)=> {
             setKillablePlayers(players);
         });
+        socket.on("savablePlayers", (players)=> {
+            setSavablePlayers(players);
+        })
         socket.on("nightPhaseReadyStatus", (playersReady)=> {
             setNumReady(playersReady.length);
         });
@@ -210,6 +214,9 @@ function Game() {
     function handleMafiaKill(player) {
         socket.emit("mafiaKill", player, roomCode);
     }
+    function handleDoctorSave(player) {
+        socket.emit("doctorSave", player, roomCode);
+    }
 
     {/* End Phase Handlers */}
     function handleRestartGame() {
@@ -270,6 +277,8 @@ function Game() {
                     killed={killed}
                     roundNumber={roundNumber}
                     skipTime={skipTime}
+                    handleDoctorSave={handleDoctorSave}
+                    savablePlayers={savablePlayers}
                 />
 
                 <End
