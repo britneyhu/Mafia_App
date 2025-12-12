@@ -12,6 +12,7 @@ function createRoom(name, socketId) {
         data: {
             roundNumber: 1,
             previouslySaved: "",
+            hero: "",
         },
 
         players: [{
@@ -26,6 +27,7 @@ function createRoom(name, socketId) {
             votes: [],
             currentKill: false,
             currentSave: false,
+            currentInvestigate: false,
         }],
     }
 
@@ -52,6 +54,7 @@ function joinRoom(name, roomCode, socketId) {
         votes: [],
         currentKill: false,
         currentSave: false,
+        currentInvestigate: false,
     });
 
     return roomCode;
@@ -99,7 +102,12 @@ function resetRoom(roomCode) {
         p.votes = [];
         p.currentKill = false;
         p.currentSave = false;
+        p.currentInvestigate = false;
     });
+
+    room.data.roundNumber = 1;
+    room.data.previouslySaved = "";
+    room.data.hero = "";
 }
 
 
@@ -108,6 +116,7 @@ function resetRoom(roomCode) {
 */
 function assignRoles(roomCode) {
     const players = getPlayers(roomCode);
+    const gameData = getGameData(roomCode);
 
     const shuffled = [...players];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -115,8 +124,11 @@ function assignRoles(roomCode) {
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     
+    const heroRoles = ["Doctor", "Detective"];
+    const heroRole = heroRoles[Math.floor(Math.random() * heroRoles.length)];
+    gameData.hero = heroRole;
     shuffled[0].role = "Mafia";
-    shuffled[1].role = "Doctor";
+    shuffled[1].role = heroRole;
     shuffled.slice(2).forEach(p => p.role = "Villager");
 
     return shuffled;
@@ -234,6 +246,14 @@ function setCurrentSave(roomCode, savedPlayerName, playerId) {
     player.currentSave = savedPlayer.name;
 }
 
+function setCurrentInvestigate(roomCode, investigatedPlayerName, playerId) {
+    const players = getPlayers(roomCode);
+    const player = players.find(p => p.id === playerId);
+    const investigatedPlayer = players.find(p => p.name === investigatedPlayerName);
+    player.currentInvestigate = investigatedPlayer.name;
+    return investigatedPlayer.role === "Mafia" ? true : false;
+}
+
 
 /*
     Night Results Phase
@@ -248,6 +268,12 @@ function resetCurrentSave(roomCode, playerId) {
     const players = getPlayers(roomCode);
     const player = players.find(p => p.id === playerId);
     player.currentSave = false;
+}
+
+function resetCurrentInvestigate(roomCode, playerId) {
+    const players = getPlayers(roomCode);
+    const player = players.find(p => p.id === playerId);
+    player.currentInvestigate = false;
 }
 
 
@@ -278,4 +304,6 @@ module.exports = {
     setCurrentSave,
     resetCurrentSave,
     getGameData,
+    setCurrentInvestigate,
+    resetCurrentInvestigate,
 };

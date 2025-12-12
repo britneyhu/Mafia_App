@@ -1,7 +1,8 @@
 const { 
     getPlayers, getAlivePlayers, setRoundNumber, setNightPhaseReady, 
     resetNightPhaseReady, setCurrentKill, killPlayer, resetCurrentKill, 
-    setSurvey, setCurrentSave, resetCurrentSave, getGameData 
+    setSurvey, setCurrentSave, resetCurrentSave, getGameData, 
+    setCurrentInvestigate, resetCurrentInvestigate,
 } = require("../rooms");
 
 const roomTimers = {};
@@ -15,11 +16,13 @@ function handleNightPhase(socket, io) {
         const previouslySaved = gameData.previouslySaved;
         const killablePlayers = players.filter(p => p.alive && p.id !== socket.id);
         const savablePlayers = players.filter(p => p.alive && p.name !== previouslySaved);
+        const investigatablePlayers = players.filter(p => p.alive && p.role !== "Detective");
         const alivePlayers = getAlivePlayers(roomCode);
 
         socket.emit("roleReveal", player.role);
         socket.emit("killablePlayers", killablePlayers);
         socket.emit("savablePlayers", savablePlayers);
+        socket.emit("investigatablePlayers", investigatablePlayers);
         io.to(roomCode).emit("alivePlayers", alivePlayers.length);
     });
 
@@ -112,6 +115,38 @@ function handleNightPhase(socket, io) {
 
             console.error(err);
         }
+    });
+
+    socket.on("detectiveInvestigate", (investigate, roomCode)=> {
+        try{
+            //Check if player investigated already
+            const players = getPlayers(roomCode);
+            const playerObject = players.find(p => p.id === socket.id);
+            if(playerObject.nightPhaseReady) throw new Error(`Player already investigated`);
+
+            if(investigate !== "Skip"){
+                const investigationResult = setCurrentInvestigate(roomCode, investigate, socket.id);
+                socket.emit("investigationResult", investigationResult);
+            }
+
+            const playersReady = setNightPhaseReady(roomCode, socket.id);
+            io.to(roomCode).emit("nightPhaseReadyStatus", playersReady);
+
+            const alivePlayers = getAlivePlayers(roomCode);
+
+            if(playersReady.length === alivePlayers.length){
+                io.to(roomCode).emit("nightPhaseAllReady", "nightResultsPhase");
+                resetNightPhaseReady(roomCode);
+            }
+        }
+        catch(err) {
+            socket.emit("errorMessage", err.message);
+            setTimeout(()=> {
+                socket.emit("errorMessage", "");
+            }, 3000);
+
+            console.error(err);
+        }
     })
 
     //When night results phase starts, send night results, then emit next logical phase in 5 seconds
@@ -119,9 +154,13 @@ function handleNightPhase(socket, io) {
         try{
             //Check if anyone was killed
             const players = getPlayers(roomCode);
+            const data = getGameData(roomCode);
+            const hero = data.hero;
+
             const mafia = players.find(p => p.role === "Mafia");
             const doctor = players.find(p => p.role === "Doctor");
-            const villagers = players.filter(p => p.role === "Villager" || p.role === "Doctor" && p.alive);
+            const detective = players.find(p => p.role === "Detective");
+            const villagers = players.filter(p => p.role !== "Mafia" && p.alive);
             const killed = players.find(p => p.name === mafia.currentKill);
 
             if(!mafia.currentKill){
@@ -159,7 +198,9 @@ function handleNightPhase(socket, io) {
                         io.to(roomCode).emit("nightResultsPhaseReady", "dayPhase");
                     }
                     resetCurrentKill(roomCode, mafia.id);
-                    resetCurrentSave(roomCode, doctor.id);
+
+                    if(hero === "Doctor") resetCurrentSave(roomCode, doctor.id);
+                    if(hero === "Detective") resetCurrentInvestigate(roomCode, detective.id);             
                     }
             }, 1000);
 
