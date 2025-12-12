@@ -1,12 +1,12 @@
 import Button from "../Button";
 
-function Day({ phase, time, numReady, alivePlayers, handleSkipDay }) {
+function Day({ phase, dayTime, numReady, alivePlayers, handleSkipDay, roundNumber }) {
 
     return(
         <div className={phase === "dayPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
-            Day Phase
+            <div>Day Phase Round {roundNumber}</div>
             <div>
-                Time Left: {time}
+                Time Left: {dayTime}
             </div>
 
             <Button onClick={handleSkipDay}>Skip</Button>

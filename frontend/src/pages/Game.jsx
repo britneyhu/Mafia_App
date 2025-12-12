@@ -17,7 +17,8 @@ function Game() {
     const [roleVisible, setRoleVisible] = useState(false);
     const [numReady, setNumReady] = useState(0);
     const [errorMessage, setErrorMessage] = useState("");
-    const [time, setTime] = useState("");
+    const [dayTime, setDayTime] = useState(180);
+    const [skipTime, setSkipTime] = useState(5);
     const [skipResults, setSkipResults] = useState([]);
     const [votedOff, setVotedOff] = useState("");
     const [killed, setKilled] = useState("");
@@ -26,16 +27,10 @@ function Game() {
     const [killablePlayers, setKillablePlayers] = useState([]);
     const [votablePlayers, setVotablePlayers] = useState([]);
     const [alivePlayers, setAlivePlayers] = useState(0);
+    const [roundNumber, setRoundNumber] = useState(1);
 
     useEffect(()=>{
         socket.emit("requestAlivePlayers", roomCode);
-
-        {/* End Phase Sockets */}
-
-        socket.on("endPhase", (winnerTeam)=> {
-            setWinner(winnerTeam);
-            setPhase("endPhase");
-        });
 
         {/* Role Phase Sockets */}
         socket.on("rolePhaseReadyStatus", (playersReady)=>{
@@ -51,7 +46,7 @@ function Game() {
 
         {/* Day Phase Sockets */}
         socket.on("dayTimer", (timeLeft)=> {
-            setTime(timeLeft);
+            setDayTime(timeLeft);
         });
         socket.on("dayPhaseReadyStatus", (playersReady)=> {
             setNumReady(playersReady.length);
@@ -92,6 +87,9 @@ function Game() {
             socket.emit("nightPhase", roomCode);
             setPhase("nightPhase");
         });
+        socket.on("skipTimer", (timeLeft)=> {
+            setSkipTime(timeLeft);
+        });
 
 
         {/* Night Phase Sockets */}
@@ -116,6 +114,21 @@ function Game() {
             socket.emit("dayPhase", roomCode, 180);
             setPhase("dayPhase");
         });
+        socket.on("skipTimer", (timeLeft)=> {
+            setSkipTime(timeLeft);
+        });
+
+
+        {/* End Phase Sockets */}
+        socket.on("endPhase", (winnerTeam)=> {
+            setWinner(winnerTeam);
+            setPhase("endPhase");
+        });
+        socket.on("gameRestarted", ()=>{
+            setRoundNumber(1);
+            setPhase("role");
+            setRoleVisible(false);
+        })
 
 
         {/* Tool Sockets */}
@@ -128,6 +141,9 @@ function Game() {
         socket.on("roleReveal", (playerRole)=>{
             setRole(playerRole);
         });
+        socket.on("roundNumber", (number)=>{
+            setRoundNumber(number);
+        })
 
         
         {/* Error Sockets */}
@@ -195,6 +211,11 @@ function Game() {
         socket.emit("mafiaKill", player, roomCode);
     }
 
+    {/* End Phase Handlers */}
+    function handleRestartGame() {
+        socket.emit("restartGame", roomCode);
+    }
+
     return(
         <>
             <Navbar/>
@@ -219,10 +240,11 @@ function Game() {
 
                 <Day
                     phase={phase}
-                    time={time}
+                    dayTime={dayTime}
                     numReady={numReady}
                     alivePlayers={alivePlayers}
                     handleSkipDay={handleSkipDay}
+                    roundNumber={roundNumber}
                 />
 
                 <Vote
@@ -233,6 +255,8 @@ function Game() {
                     handleVote={handleVote}
                     skipResults={skipResults}
                     votedOff={votedOff}
+                    roundNumber={roundNumber}
+                    skipTime={skipTime}
                 />
 
                 <Night
@@ -244,11 +268,14 @@ function Game() {
                     handleMafiaKill={handleMafiaKill}
                     killablePlayers={killablePlayers}
                     killed={killed}
+                    roundNumber={roundNumber}
+                    skipTime={skipTime}
                 />
 
                 <End
                     phase={phase}
                     winner={winner}
+                    handleRestartGame={handleRestartGame}
                 />
 
                 <div>{errorMessage}</div>

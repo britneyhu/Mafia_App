@@ -12,6 +12,7 @@ function Mafia({ role, killablePlayers, handleMafiaKill, numReady, alivePlayers 
                         <Button key={player.id} onClick={()=>handleMafiaKill(player.name)}>{player.name}</Button>
                     </div>
                 ))}
+                <Button onClick={()=>handleMafiaKill("Skip")}>Skip</Button>
             </ul>
 
             <div>{numReady + "/" + alivePlayers + " Ready"}</div>

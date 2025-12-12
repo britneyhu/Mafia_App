@@ -1,11 +1,11 @@
 import Villager from "./Roles/Villager";
 import Mafia from "./Roles/Mafia";
 
-function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], handleSurveySubmit, handleMafiaKill, killed }) {
+function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], handleSurveySubmit, handleMafiaKill, killed, roundNumber, skipTime }) {
     return(
         <div>
             <div className={phase === "nightPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
-                <div>Night Phase</div>
+                <div>Night Phase Round {roundNumber}</div>
 
                 <Villager
                     role={role}
@@ -24,8 +24,9 @@ function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], hand
             </div>
 
             <div className={phase === "nightResultsPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
-                <div>Night Results Phase</div>
+                <div>Night Results Phase {roundNumber}</div>
                 <div>{killed} Was Killed Last Night</div>
+                <div>Advancing in {skipTime}</div>
             </div>
 
         </div>
