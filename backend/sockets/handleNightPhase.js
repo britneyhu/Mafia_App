@@ -1,4 +1,8 @@
-const { getPlayers, getAlivePlayers, setRoundNumber, setNightPhaseReady, resetNightPhaseReady, setCurrentKill, killPlayer, resetCurrentKill, setSurvey } = require("../rooms");
+const { 
+    getPlayers, getAlivePlayers, setRoundNumber, setNightPhaseReady, 
+    resetNightPhaseReady, setCurrentKill, killPlayer, resetCurrentKill, 
+    setSurvey, setCurrentSave, resetCurrentSave, getGameData 
+} = require("../rooms");
 
 const roomTimers = {};
 
@@ -6,12 +10,16 @@ function handleNightPhase(socket, io) {
     //When night phase starts, send role, alive players, and killable players
     socket.on("nightPhase", (roomCode)=>{
         const players = getPlayers(roomCode);
+        const gameData = getGameData(roomCode);
         const player = players.find(p => p.id === socket.id);
+        const previouslySaved = gameData.previouslySaved;
         const killablePlayers = players.filter(p => p.alive && p.id !== socket.id);
+        const savablePlayers = players.filter(p => p.alive && p.name !== previouslySaved);
         const alivePlayers = getAlivePlayers(roomCode);
 
         socket.emit("roleReveal", player.role);
         socket.emit("killablePlayers", killablePlayers);
+        socket.emit("savablePlayers", savablePlayers);
         io.to(roomCode).emit("alivePlayers", alivePlayers.length);
     });
 
@@ -48,14 +56,14 @@ function handleNightPhase(socket, io) {
 
     //When a mafia kills a player, record their kill, then update everyone on who is ready
     //If everyone is ready, emit night results phase
-    socket.on("mafiaKill", (player, roomCode)=> {
+    socket.on("mafiaKill", (kill, roomCode)=> {
         try{
             //Check if player killed already
             const players = getPlayers(roomCode);
             const playerObject = players.find(p => p.id === socket.id);
             if(playerObject.nightPhaseReady) throw new Error(`Player already killed`);
 
-            if(player !== "Skip") setCurrentKill(roomCode, player, socket.id);
+            if(kill !== "Skip") setCurrentKill(roomCode, kill, socket.id);
 
             const playersReady = setNightPhaseReady(roomCode, socket.id);
             io.to(roomCode).emit("nightPhaseReadyStatus", playersReady);
@@ -73,9 +81,38 @@ function handleNightPhase(socket, io) {
                 socket.emit("errorMessage", "");
             }, 3000);
 
-            console.error(err)
+            console.error(err);
         }
     });
+
+    socket.on("doctorSave", (save, roomCode)=> {
+        try{
+            //Check if player saved already
+            const players = getPlayers(roomCode);
+            const playerObject = players.find(p => p.id === socket.id);
+            if(playerObject.nightPhaseReady) throw new Error(`Player already saved`);
+
+            if(save !== "Skip") setCurrentSave(roomCode, save, socket.id);
+
+            const playersReady = setNightPhaseReady(roomCode, socket.id);
+            io.to(roomCode).emit("nightPhaseReadyStatus", playersReady);
+
+            const alivePlayers = getAlivePlayers(roomCode);
+
+            if(playersReady.length === alivePlayers.length){
+                io.to(roomCode).emit("nightPhaseAllReady", "nightResultsPhase");
+                resetNightPhaseReady(roomCode);
+            }
+        }
+        catch(err) {
+            socket.emit("errorMessage", err.message);
+            setTimeout(()=> {
+                socket.emit("errorMessage", "");
+            }, 3000);
+
+            console.error(err);
+        }
+    })
 
     //When night results phase starts, send night results, then emit next logical phase in 5 seconds
     socket.on("nightResultsPhase", (roomCode)=> {
@@ -83,16 +120,20 @@ function handleNightPhase(socket, io) {
             //Check if anyone was killed
             const players = getPlayers(roomCode);
             const mafia = players.find(p => p.role === "Mafia");
-            const villagers = players.filter(p => p.role === "Villager" && p.alive);
+            const doctor = players.find(p => p.role === "Doctor");
+            const villagers = players.filter(p => p.role === "Villager" || p.role === "Doctor" && p.alive);
             const killed = players.find(p => p.name === mafia.currentKill);
 
             if(!mafia.currentKill){
                 io.to(roomCode).emit("killed", "No one");
             }
+            else if(doctor.currentSave && doctor.currentSave === mafia.currentKill){
+                io.to(roomCode).emit("killed", "No one");
+            }
             else{
                 io.to(roomCode).emit("killed", killed.name);
                 io.to(killed.id).emit("dead");
-                killPlayer(roomCode, killed.name);
+                killPlayer(roomCode, killed.name, socket.id);
             }
 
             //Calculate if win condition is met
@@ -118,6 +159,7 @@ function handleNightPhase(socket, io) {
                         io.to(roomCode).emit("nightResultsPhaseReady", "dayPhase");
                     }
                     resetCurrentKill(roomCode, mafia.id);
+                    resetCurrentSave(roomCode, doctor.id);
                     }
             }, 1000);
 

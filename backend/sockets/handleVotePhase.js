@@ -83,7 +83,7 @@ function handleVotePhase(socket, io) {
 
         //Calculate if win condition is met
         const players = getPlayers(roomCode);
-        const villagers = players.filter(p => p.role === "Villager" && p.alive);
+        const villagers = players.filter(p => (p.role === "Villager" || p.role === "Doctor") && p.alive);
 
         let timeLeft = 6;
         const interval = setInterval(()=> {

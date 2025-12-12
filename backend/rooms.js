@@ -9,8 +9,9 @@ function createRoom(name, socketId) {
     const roomCode = generateCode();
 
     rooms[roomCode] = {
-        game: {
+        data: {
             roundNumber: 1,
+            previouslySaved: "",
         },
 
         players: [{
@@ -23,10 +24,8 @@ function createRoom(name, socketId) {
             alive: true,
             role: null,
             votes: [],
-            voted: [],
-            surveys: [],
             currentKill: false,
-            killed: [],
+            currentSave: false,
         }],
     }
 
@@ -51,10 +50,8 @@ function joinRoom(name, roomCode, socketId) {
         alive: true,
         role: null,
         votes: [],
-        voted: [],
-        surveys: [],
         currentKill: false,
-        killed: [],
+        currentSave: false,
     });
 
     return roomCode;
@@ -72,6 +69,10 @@ function getPlayers(roomCode) {
     return rooms[roomCode] ? rooms[roomCode].players : [];
 }
 
+function getGameData(roomCode) {
+    return rooms[roomCode] ? rooms[roomCode].data : [];
+}
+
 function getAlivePlayers(roomCode) {
     const players = getPlayers(roomCode);
     const alivePlayers = players.filter(p => p.alive);
@@ -80,8 +81,8 @@ function getAlivePlayers(roomCode) {
 
 function setRoundNumber(roomCode) {
     const room = rooms[roomCode];
-    room.game.round = (room.round || 1) + 1;
-    return room.game.round;
+    room.data.round = (room.round || 1) + 1;
+    return room.data.round;
 }
 
 function resetRoom(roomCode) {
@@ -96,10 +97,8 @@ function resetRoom(roomCode) {
         p.alive = true;
         p.role = null;
         p.votes = [];
-        p.voted = [];
-        p.surveys = [];
         p.currentKill = false;
-        p.killed = [];
+        p.currentSave = false;
     });
 }
 
@@ -117,7 +116,8 @@ function assignRoles(roomCode) {
     }
     
     shuffled[0].role = "Mafia";
-    shuffled.slice(1).forEach(p => p.role = "Villager");
+    shuffled[1].role = "Doctor";
+    shuffled.slice(2).forEach(p => p.role = "Villager");
 
     return shuffled;
 }
@@ -168,7 +168,6 @@ function resetVotePhaseReady(roomCode) {
 
 function setVotes(roomCode, voterObject, voted) {
     const players = getAlivePlayers(roomCode);
-    voterObject.voted.push(voted);
 
     const voterName = voterObject.name;
     const votedObject = players.find(p => p.name === voted);
@@ -209,23 +208,30 @@ function resetNightPhaseReady(roomCode) {
     players.forEach(p => p.nightPhaseReady = false);
 }
 
-function setCurrentKill(roomCode, playerName, playerId) {
+function setCurrentKill(roomCode, killedPlayerName, playerId) {
     const players = getPlayers(roomCode);
     const player = players.find(p => p.id === playerId);
-    const killedPlayer = players.find(p => p.name === playerName);
+    const killedPlayer = players.find(p => p.name === killedPlayerName);
     player.currentKill = killedPlayer.name;
 }
 
-function killPlayer(roomCode, playerName) {
+function killPlayer(roomCode, killedPlayerName, playerId) {
     const players = getPlayers(roomCode);
-    const killedPlayer = players.find(p => p.name === playerName);
+    const killedPlayer = players.find(p => p.name === killedPlayerName);
     killedPlayer.alive = false;
 }
 
 function setSurvey(roomCode, answer, playerId) {
     const players = getPlayers(roomCode);
     const player = players.find(p => p.id === playerId);
-    player.surveys.push(answer);
+    // player.surveys.push(answer);
+}
+
+function setCurrentSave(roomCode, savedPlayerName, playerId) {
+    const players = getPlayers(roomCode);
+    const player = players.find(p => p.id === playerId);
+    const savedPlayer = players.find(p => p.name === savedPlayerName);
+    player.currentSave = savedPlayer.name;
 }
 
 
@@ -236,6 +242,12 @@ function resetCurrentKill(roomCode, playerId) {
     const players = getPlayers(roomCode);
     const player = players.find(p => p.id === playerId);
     player.currentKill = false; 
+}
+
+function resetCurrentSave(roomCode, playerId) {
+    const players = getPlayers(roomCode);
+    const player = players.find(p => p.id === playerId);
+    player.currentSave = false;
 }
 
 
@@ -263,4 +275,7 @@ module.exports = {
     setCurrentKill,
     setRoundNumber,
     resetRoom,
+    setCurrentSave,
+    resetCurrentSave,
+    getGameData,
 };
