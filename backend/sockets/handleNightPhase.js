@@ -1,4 +1,6 @@
-const { getPlayers, getAlivePlayers, setNightPhaseReady, resetNightPhaseReady, setCurrentKill, killPlayer, resetCurrentKill, setSurvey } = require("../rooms");
+const { getPlayers, getAlivePlayers, setRoundNumber, setNightPhaseReady, resetNightPhaseReady, setCurrentKill, killPlayer, resetCurrentKill, setSurvey } = require("../rooms");
+
+const roomTimers = {};
 
 function handleNightPhase(socket, io) {
     //When night phase starts, send role, alive players, and killable players
@@ -11,7 +13,6 @@ function handleNightPhase(socket, io) {
         socket.emit("roleReveal", player.role);
         socket.emit("killablePlayers", killablePlayers);
         io.to(roomCode).emit("alivePlayers", alivePlayers.length);
-
     });
 
     //When a villager submits the survey, record their submission, then update everyone on who is ready
@@ -54,7 +55,7 @@ function handleNightPhase(socket, io) {
             const playerObject = players.find(p => p.id === socket.id);
             if(playerObject.nightPhaseReady) throw new Error(`Player already killed`);
 
-            setCurrentKill(roomCode, player, socket.id);
+            if(player !== "Skip") setCurrentKill(roomCode, player, socket.id);
 
             const playersReady = setNightPhaseReady(roomCode, socket.id);
             io.to(roomCode).emit("nightPhaseReadyStatus", playersReady);
@@ -95,18 +96,32 @@ function handleNightPhase(socket, io) {
             }
 
             //Calculate if win condition is met
-            setTimeout(()=> {
-                if(mafia.alive === false){
-                    io.to(roomCode).emit("endPhase", "Villagers");
-                }
-                else if(villagers.length === 1){
-                    io.to(roomCode).emit("endPhase", "Mafia");
-                }
-                else{
-                    io.to(roomCode).emit("nightResultsPhaseReady", "dayPhase");
-                }
-                resetCurrentKill(roomCode, mafia.id);
-            }, 5000);
+            let timeLeft = 6;
+            const interval = setInterval(()=> {
+                io.to(roomCode).emit("skipTimer", timeLeft-1);
+                timeLeft--;
+
+                if(timeLeft === 0){
+                    clearInterval(interval);
+                    delete roomTimers[roomCode];
+
+                    const roundNumber = setRoundNumber(roomCode);
+                    io.to(roomCode).emit("roundNumber", roundNumber);
+
+                    if(mafia.alive === false){
+                        io.to(roomCode).emit("endPhase", "Villagers");
+                    }
+                    else if(villagers.length === 1){
+                        io.to(roomCode).emit("endPhase", "Mafia");
+                    }
+                    else{
+                        io.to(roomCode).emit("nightResultsPhaseReady", "dayPhase");
+                    }
+                    resetCurrentKill(roomCode, mafia.id);
+                    }
+            }, 1000);
+
+            roomTimers[roomCode] = interval;
 
             
         }
@@ -115,7 +130,7 @@ function handleNightPhase(socket, io) {
             setTimeout(()=> {
                 socket.emit("errorMessage", "");
             }, 3000);
-            
+
             console.error(err);
         }
     });

@@ -12,10 +12,10 @@ function handleDayPhase(socket, io) {
             clearInterval(roomTimers[roomCode]);
         }
 
-        let timeLeft = duration;
+        let timeLeft = duration+1;
 
         const interval = setInterval(()=> {
-            io.to(roomCode).emit("dayTimer", timeLeft);
+            io.to(roomCode).emit("dayTimer", timeLeft-1);
             timeLeft--;
 
             if(timeLeft === 0){
@@ -59,7 +59,7 @@ function handleDayPhase(socket, io) {
             setTimeout(()=> {
                 socket.emit("errorMessage", "");
             }, 3000);
-            
+
             console.error(err);
         }
     });

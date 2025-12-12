@@ -9,6 +9,10 @@ function createRoom(name, socketId) {
     const roomCode = generateCode();
 
     rooms[roomCode] = {
+        game: {
+            roundNumber: 1,
+        },
+
         players: [{
             id: socketId, 
             name: name,
@@ -17,7 +21,7 @@ function createRoom(name, socketId) {
             votePhaseReady: false,
             nightPhaseReady: false,
             alive: true,
-            role: undefined,
+            role: null,
             votes: [],
             voted: [],
             surveys: [],
@@ -45,7 +49,7 @@ function joinRoom(name, roomCode, socketId) {
         votePhaseReady: false,
         nightPhaseReady: false,
         alive: true,
-        role: undefined,
+        role: null,
         votes: [],
         voted: [],
         surveys: [],
@@ -72,6 +76,31 @@ function getAlivePlayers(roomCode) {
     const players = getPlayers(roomCode);
     const alivePlayers = players.filter(p => p.alive);
     return alivePlayers;
+}
+
+function setRoundNumber(roomCode) {
+    const room = rooms[roomCode];
+    room.game.round = (room.round || 1) + 1;
+    return room.game.round;
+}
+
+function resetRoom(roomCode) {
+    if(!rooms[roomCode]) throw new Error("Room not found");
+    const room = rooms[roomCode];
+
+    room.players.forEach(p => {
+        p.rolePhaseReady = false;
+        p.dayPhaseReady = false;
+        p.votePhaseReady = false;
+        p.nightPhaseReady = false;
+        p.alive = true;
+        p.role = null;
+        p.votes = [];
+        p.voted = [];
+        p.surveys = [];
+        p.currentKill = false;
+        p.killed = [];
+    });
 }
 
 
@@ -232,4 +261,6 @@ module.exports = {
     voteOffPlayer,
     getAlivePlayers,
     setCurrentKill,
+    setRoundNumber,
+    resetRoom,
 };

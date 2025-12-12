@@ -1,6 +1,7 @@
 const { getPlayers, getAlivePlayers, setVotePhaseReady, resetVotePhaseReady, setVotes, resetVotes, voteOffPlayer  } = require("../rooms");
 
 const roomSkips = {};
+const roomTimers = {};
 
 function handleVotePhase(socket, io) {
     //When vote phase starts, send alive players and votable players
@@ -58,21 +59,22 @@ function handleVotePhase(socket, io) {
     socket.on("voteResultsPhase", (roomCode)=> {
         //Calculate who has the highest votes (or no one)
         const votingPlayers = getAlivePlayers(roomCode);
-        const numVotes = votingPlayers.reduce((sum, p) => sum + p.votes.length, 0);
         const maxVotes = Math.max(...votingPlayers.map(p => p.votes.length));
         const maxVotedPlayers = votingPlayers.filter(p => p.votes.length === maxVotes);
         const skips = roomSkips[roomCode] || [];
         let votedOff = false;
-        
+
+        //tied in votes
         if(maxVotedPlayers.length > 1){
             io.to(roomCode).emit("votedOff", "No One");
         }
-        else if(skips.length >= numVotes){
-            io.to(roomCode).emit("votedOff", "No One");
-        }
-        else{
+        //one person has majority votes
+        else if((maxVotes / votingPlayers.length) > 0.5){
             io.to(roomCode).emit("votedOff", maxVotedPlayers[0].name);
             votedOff = maxVotedPlayers[0];
+        }
+        else{
+            io.to(roomCode).emit("votedOff", "No One");
         }
 
         //Send results
@@ -83,25 +85,36 @@ function handleVotePhase(socket, io) {
         const players = getPlayers(roomCode);
         const villagers = players.filter(p => p.role === "Villager" && p.alive);
 
-        setTimeout(()=> {
-            if(votedOff.role === "Mafia"){
-                io.to(roomCode).emit("endPhase", "Villagers");
-            }
-            else if(villagers.length <= 2){
-                io.to(roomCode).emit("endPhase", "Mafia");
-            }
-            else{
-                io.to(roomCode).emit("voteResultsAllReady", "nightPhase");
-            }
+        let timeLeft = 6;
+        const interval = setInterval(()=> {
+            io.to(roomCode).emit("skipTimer", timeLeft-1);
+            timeLeft--;
 
-            if(votedOff){
-                io.to(votedOff.id).emit("dead");
-                voteOffPlayer(roomCode, votedOff.name);
+            if(timeLeft === 0){
+                clearInterval(interval);
+                delete roomTimers[roomCode];
+
+                if(votedOff.role === "Mafia"){
+                    io.to(roomCode).emit("endPhase", "Villagers");
+                }
+                else if(villagers.length <= 2){
+                    io.to(roomCode).emit("endPhase", "Mafia");
+                }
+                else{
+                    io.to(roomCode).emit("voteResultsAllReady", "nightPhase");
+                }
+
+                if(votedOff){
+                    io.to(votedOff.id).emit("dead");
+                    voteOffPlayer(roomCode, votedOff.name);
+                }
+                
+                resetVotes(roomCode);
+                roomSkips[roomCode] = [];
             }
-            
-            resetVotes(roomCode);
-            roomSkips[roomCode] = [];
-        }, 5000);
+        }, 1000);
+
+        roomTimers[roomCode] = interval;
     });
 }
 
