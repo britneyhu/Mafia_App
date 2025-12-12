@@ -29,6 +29,8 @@ function Game() {
     const [alivePlayers, setAlivePlayers] = useState(0);
     const [roundNumber, setRoundNumber] = useState(1);
     const [savablePlayers, setSavablePlayers] = useState([]);
+    const [investigatablePlayers, setInvestigatablePlayers] = useState([]);
+    const [investigationResult, setInvestigationResult] = useState("none");
 
     useEffect(()=>{
         socket.emit("requestAlivePlayers", roomCode);
@@ -54,6 +56,7 @@ function Game() {
         });
         socket.on("dayPhaseAllReady", ()=> {
             setNumReady(0);
+            setDayTime(180);
             socket.emit("votePhase", roomCode);
             setPhase("votePhase");
         });
@@ -86,6 +89,7 @@ function Game() {
         });
         socket.on("voteResultsAllReady", ()=> {
             socket.emit("nightPhase", roomCode);
+            setSkipTime(5);
             setPhase("nightPhase");
         });
         socket.on("skipTimer", (timeLeft)=> {
@@ -99,12 +103,19 @@ function Game() {
         });
         socket.on("savablePlayers", (players)=> {
             setSavablePlayers(players);
+        });
+        socket.on("investigatablePlayers", (players)=> {
+            setInvestigatablePlayers(players);
+        });
+        socket.on("investigationResult", (result)=> {
+            setInvestigationResult(result);
         })
         socket.on("nightPhaseReadyStatus", (playersReady)=> {
             setNumReady(playersReady.length);
         });
         socket.on("nightPhaseAllReady", ()=> {
             setNumReady(0);
+            setInvestigationResult("none");
             socket.emit("nightResultsPhase", roomCode);
             setPhase("nightResultsPhase");
         });
@@ -114,7 +125,7 @@ function Game() {
             setKilled(result);
         });
         socket.on("nightResultsPhaseReady", ()=> {
-            setNumReady(0);
+            setSkipTime(5);
             socket.emit("dayPhase", roomCode, 180);
             setPhase("dayPhase");
         });
@@ -217,6 +228,9 @@ function Game() {
     function handleDoctorSave(player) {
         socket.emit("doctorSave", player, roomCode);
     }
+    function handleDetectiveInvestigate(player) {
+        socket.emit("detectiveInvestigate", player, roomCode);
+    }
 
     {/* End Phase Handlers */}
     function handleRestartGame() {
@@ -279,6 +293,9 @@ function Game() {
                     skipTime={skipTime}
                     handleDoctorSave={handleDoctorSave}
                     savablePlayers={savablePlayers}
+                    investigatablePlayers={investigatablePlayers}
+                    handleDetectiveInvestigate={handleDetectiveInvestigate}
+                    investigationResult={investigationResult}
                 />
 
                 <End
