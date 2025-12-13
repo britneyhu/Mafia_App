@@ -14,12 +14,14 @@ function handleNightPhase(socket, io) {
         const gameData = getGameData(roomCode);
         const player = players.find(p => p.id === socket.id);
         const previouslySaved = gameData.previouslySaved;
-        const killablePlayers = players.filter(p => p.alive && p.id !== socket.id);
+        const guessablePlayers = players.filter(p => p.alive && p.id !== socket.id);
+        const killablePlayers = players.filter(p => p.alive && p.role !== "Mafia");
         const savablePlayers = players.filter(p => p.alive && p.name !== previouslySaved);
         const investigatablePlayers = players.filter(p => p.alive && p.role !== "Detective");
         const alivePlayers = getAlivePlayers(roomCode);
 
         socket.emit("roleReveal", player.role);
+        socket.emit("guessablePlayers", guessablePlayers);
         socket.emit("killablePlayers", killablePlayers);
         socket.emit("savablePlayers", savablePlayers);
         socket.emit("investigatablePlayers", investigatablePlayers);
@@ -93,9 +95,14 @@ function handleNightPhase(socket, io) {
             //Check if player saved already
             const players = getPlayers(roomCode);
             const playerObject = players.find(p => p.id === socket.id);
+            const gameData = getGameData(roomCode);
             if(playerObject.nightPhaseReady) throw new Error(`Player already saved`);
+            if(gameData.previouslySaved === save) throw new Error(`Can't save the same player 2 nights in a row`);
 
-            if(save !== "Skip") setCurrentSave(roomCode, save, socket.id);
+            if(save !== "Skip"){
+                setCurrentSave(roomCode, save, socket.id);
+                gameData.previouslySaved = save;
+            }
 
             const playersReady = setNightPhaseReady(roomCode, socket.id);
             io.to(roomCode).emit("nightPhaseReadyStatus", playersReady);
@@ -122,12 +129,40 @@ function handleNightPhase(socket, io) {
             //Check if player investigated already
             const players = getPlayers(roomCode);
             const playerObject = players.find(p => p.id === socket.id);
-            if(playerObject.nightPhaseReady) throw new Error(`Player already investigated`);
+            if(playerObject.currentInvestigate || playerObject.nightPhaseReady) throw new Error(`Player cannot investigate anymore`);
 
             if(investigate !== "Skip"){
                 const investigationResult = setCurrentInvestigate(roomCode, investigate, socket.id);
                 socket.emit("investigationResult", investigationResult);
             }
+            else{
+                const playersReady = setNightPhaseReady(roomCode, socket.id);
+                io.to(roomCode).emit("nightPhaseReadyStatus", playersReady);
+
+                const alivePlayers = getAlivePlayers(roomCode);
+
+                if(playersReady.length === alivePlayers.length){
+                    io.to(roomCode).emit("nightPhaseAllReady", "nightResultsPhase");
+                    resetNightPhaseReady(roomCode);
+                }
+            }
+        }
+        catch(err) {
+            socket.emit("errorMessage", err.message);
+            setTimeout(()=> {
+                socket.emit("errorMessage", "");
+            }, 3000);
+
+            console.error(err);
+        }
+    });
+
+    socket.on("detectiveReady", (roomCode)=> {
+        try{
+            //Check if player investigated already
+            const players = getPlayers(roomCode);
+            const playerObject = players.find(p => p.id === socket.id);
+            if(playerObject.nightPhaseReady) throw new Error(`Player already ready`);
 
             const playersReady = setNightPhaseReady(roomCode, socket.id);
             io.to(roomCode).emit("nightPhaseReadyStatus", playersReady);
@@ -147,7 +182,7 @@ function handleNightPhase(socket, io) {
 
             console.error(err);
         }
-    })
+    });
 
     //When night results phase starts, send night results, then emit next logical phase in 5 seconds
     socket.on("nightResultsPhase", (roomCode)=> {
@@ -155,18 +190,26 @@ function handleNightPhase(socket, io) {
             //Check if anyone was killed
             const players = getPlayers(roomCode);
             const data = getGameData(roomCode);
-            const hero = data.hero;
 
             const mafia = players.find(p => p.role === "Mafia");
-            const doctor = players.find(p => p.role === "Doctor");
-            const detective = players.find(p => p.role === "Detective");
             const villagers = players.filter(p => p.role !== "Mafia" && p.alive);
             const killed = players.find(p => p.name === mafia.currentKill);
+
+            const hero = data.hero;
+            let doctor;
+            let detective;
+            if(hero === "Doctor"){
+                doctor = players.find(p => p.role === "Doctor");
+            }
+            else if(hero === "Detective"){
+                detective = players.find(p => p.role === "Detective");
+            }
+            
 
             if(!mafia.currentKill){
                 io.to(roomCode).emit("killed", "No one");
             }
-            else if(doctor.currentSave && doctor.currentSave === mafia.currentKill){
+            else if(doctor && doctor.currentSave && doctor.currentSave === mafia.currentKill){
                 io.to(roomCode).emit("killed", "No one");
             }
             else{
@@ -199,14 +242,12 @@ function handleNightPhase(socket, io) {
                     }
                     resetCurrentKill(roomCode, mafia.id);
 
-                    if(hero === "Doctor") resetCurrentSave(roomCode, doctor.id);
-                    if(hero === "Detective") resetCurrentInvestigate(roomCode, detective.id);             
+                    if(doctor) resetCurrentSave(roomCode, doctor.id);
+                    else if(detective) resetCurrentInvestigate(roomCode, detective.id);             
                     }
             }, 1000);
 
             roomTimers[roomCode] = interval;
-
-            
         }
         catch(err){
             socket.emit("errorMessage", err.message);

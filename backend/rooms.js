@@ -126,7 +126,7 @@ function assignRoles(roomCode) {
     
     const heroRoles = ["Doctor", "Detective"];
     const heroRole = heroRoles[Math.floor(Math.random() * heroRoles.length)];
-    gameData.hero = heroRole;
+    gameData.hero = heroRole
     shuffled[0].role = "Mafia";
     shuffled[1].role = heroRole;
     shuffled.slice(2).forEach(p => p.role = "Villager");

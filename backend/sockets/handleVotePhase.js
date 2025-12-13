@@ -1,7 +1,8 @@
 const { getPlayers, getAlivePlayers, setVotePhaseReady, resetVotePhaseReady, setVotes, resetVotes, voteOffPlayer  } = require("../rooms");
 
 const roomSkips = {};
-const roomTimers = {};
+const votePhaseTimers = {};
+const voteResultsPhaseTimers = {};
 
 function handleVotePhase(socket, io) {
     //When vote phase starts, send alive players and votable players
@@ -12,6 +13,36 @@ function handleVotePhase(socket, io) {
 
         socket.emit("votablePlayers", votablePlayers);
         io.to(roomCode).emit("alivePlayers", alivePlayers.length);
+
+        clearInterval(votePhaseTimers[roomCode]);
+        delete votePhaseTimers[roomCode];
+        clearInterval(voteResultsPhaseTimers[roomCode]);
+        delete voteResultsPhaseTimers[roomCode];
+        let timeLeft = 61;
+
+        const interval = setInterval(()=> {
+            io.to(roomCode).emit("skipTimer", timeLeft-1);
+            timeLeft--;
+
+            if(timeLeft === 0){
+                clearInterval(interval);
+                delete votePhaseTimers[roomCode];
+
+                getAlivePlayers(roomCode).forEach(p => {
+                    if(!p.votePhaseReady){
+                        p.votePhaseReady = true;
+                        if(!roomSkips[roomCode]){
+                            roomSkips[roomCode] = [];
+                        }
+                        roomSkips[roomCode].push(p.name);
+                    }
+                })
+                
+                io.to(roomCode).emit("votePhaseAllReady", "voteResultsPhase");
+                resetVotePhaseReady(roomCode);
+            }
+        }, 1000);
+        votePhaseTimers[roomCode] = interval;
     });
 
     //When a player votes, record their vote, then update everyone on who voted
@@ -85,19 +116,24 @@ function handleVotePhase(socket, io) {
         const players = getPlayers(roomCode);
         const villagers = players.filter(p => (p.role !== "Mafia") && p.alive);
 
+        clearInterval(votePhaseTimers[roomCode]);
+        delete votePhaseTimers[roomCode];
+        clearInterval(voteResultsPhaseTimers[roomCode]);
+        delete voteResultsPhaseTimers[roomCode];
         let timeLeft = 6;
+
         const interval = setInterval(()=> {
             io.to(roomCode).emit("skipTimer", timeLeft-1);
             timeLeft--;
 
             if(timeLeft === 0){
                 clearInterval(interval);
-                delete roomTimers[roomCode];
+                delete voteResultsPhaseTimers[roomCode];
 
                 if(votedOff.role === "Mafia"){
                     io.to(roomCode).emit("endPhase", "Villagers");
                 }
-                else if(villagers.length <= 2){
+                else if(villagers.length <= 1){
                     io.to(roomCode).emit("endPhase", "Mafia");
                 }
                 else{
@@ -114,7 +150,7 @@ function handleVotePhase(socket, io) {
             }
         }, 1000);
 
-        roomTimers[roomCode] = interval;
+        voteResultsPhaseTimers[roomCode] = interval;
     });
 }
 
