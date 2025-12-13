@@ -3,7 +3,7 @@ import Mafia from "./Roles/Mafia";
 import Doctor from "./Roles/Doctor";
 import Detective from "./Roles/Detective";
 
-function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], handleSurveySubmit, handleMafiaKill, killed, roundNumber, skipTime, savablePlayers, handleDoctorSave, investigatablePlayers, handleDetectiveInvestigate, investigationResult }) {
+function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], handleSurveySubmit, handleMafiaKill, killed, roundNumber, skipTime, savablePlayers, handleDoctorSave, investigatablePlayers, handleDetectiveInvestigate, investigationResult, handleDetectiveReady, guessablePlayers }) {
     return(
         <div>
             <div className={phase === "nightPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
@@ -14,6 +14,7 @@ function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], hand
                     numReady={numReady}
                     alivePlayers={alivePlayers}
                     handleSurveySubmit={handleSurveySubmit}
+                    guessablePlayers={guessablePlayers}
                 />
 
                 <Mafia
@@ -39,6 +40,7 @@ function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], hand
                     numReady={numReady}
                     alivePlayers={alivePlayers}
                     investigationResult={investigationResult}
+                    handleDetectiveReady={handleDetectiveReady}
                 />
             </div>
 

@@ -5,6 +5,10 @@ function Vote({ phase, votablePlayers, numReady, alivePlayers, handleVote, skipR
         <div className={phase === "votePhase" || phase === "voteResultsPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
             <div>Vote Phase Round {roundNumber}</div>
 
+            <div className={phase === "votePhase" ? "flex flex-col justify-center items-center" : "hidden"}>
+                Time Left: {skipTime}
+            </div>
+
             <div className={phase === "voteResultsPhase" ? "flex" : "hidden"}>
                 {votedOff} Has Been Voted Off
             </div>

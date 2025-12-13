@@ -1,15 +1,18 @@
 import Button from "../../Button";
 
-function Villager({ role, numReady, alivePlayers, handleSurveySubmit }) {
+function Villager({ role, numReady, alivePlayers, handleSurveySubmit, guessablePlayers }) {
     return (
         <div className={role === "Villager" ? "flex flex-col justify-center items-center" : "hidden"}>
             <div>You are a Villager</div>
-            <div>Please take this survey!</div>
+            <div>Who do you suspect the most right now?</div>
 
-            <Button onClick={()=>handleSurveySubmit("Beef")}>Beef</Button>
-            <Button onClick={()=>handleSurveySubmit("Chicken")}>Chicken</Button>
-            <Button onClick={()=>handleSurveySubmit("Pork")}>Pork</Button>
-            <Button onClick={()=>handleSurveySubmit("Lamb")}>Lamb</Button>
+            <ul>
+                {guessablePlayers.map(player => (
+                    <div key={player.id}>
+                        <Button key={player.id} onClick={()=>handleSurveySubmit(player.name)}>{player.name}</Button>
+                    </div>
+                ))}
+            </ul>
 
             <div>{numReady + "/" + alivePlayers + " Ready"}</div>
         </div>

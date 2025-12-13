@@ -1,6 +1,6 @@
 import Button from "../../Button";
 
-function Doctor({ role, investigatablePlayers, handleDetectiveInvestigate, numReady, alivePlayers, investigationResult }) {
+function Doctor({ role, investigatablePlayers, handleDetectiveInvestigate, numReady, alivePlayers, investigationResult, handleDetectiveReady }) {
     return (
         <div className={role === "Detective" ? "flex flex-col justify-center items-center" : "hidden"}>
             <div>I am the Detective</div>
@@ -9,6 +9,7 @@ function Doctor({ role, investigatablePlayers, handleDetectiveInvestigate, numRe
             <div>
                 {investigationResult !== "none" && 
                 (investigationResult ? "They are Mafia" : "They are Innocent")}</div>
+                <Button className={investigationResult !== "none" ? "flex flex-col justify-center items-center" : "hidden"} onClick={handleDetectiveReady}>Continue</Button>
 
             <ul>
                 {investigatablePlayers.map(player => (

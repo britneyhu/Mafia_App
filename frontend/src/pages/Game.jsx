@@ -31,6 +31,7 @@ function Game() {
     const [savablePlayers, setSavablePlayers] = useState([]);
     const [investigatablePlayers, setInvestigatablePlayers] = useState([]);
     const [investigationResult, setInvestigationResult] = useState("none");
+    const [guessablePlayers, setGuessablePlayers] = useState([]);
 
     useEffect(()=>{
         socket.emit("requestAlivePlayers", roomCode);
@@ -57,6 +58,7 @@ function Game() {
         socket.on("dayPhaseAllReady", ()=> {
             setNumReady(0);
             setDayTime(180);
+            setSkipTime(60);
             socket.emit("votePhase", roomCode);
             setPhase("votePhase");
         });
@@ -71,6 +73,7 @@ function Game() {
         });
         socket.on("votePhaseAllReady", ()=> {
             setNumReady(0);
+            setSkipTime(5);
             socket.emit("voteResultsPhase", roomCode);
             setPhase("voteResultsPhase");
         });
@@ -98,6 +101,9 @@ function Game() {
 
 
         {/* Night Phase Sockets */}
+        socket.on("guessablePlayers", (players)=> {
+            setGuessablePlayers(players);
+        });
         socket.on("killablePlayers", (players)=> {
             setKillablePlayers(players);
         });
@@ -231,6 +237,9 @@ function Game() {
     function handleDetectiveInvestigate(player) {
         socket.emit("detectiveInvestigate", player, roomCode);
     }
+    function handleDetectiveReady() {
+        socket.emit("detectiveReady", roomCode);
+    }
 
     {/* End Phase Handlers */}
     function handleRestartGame() {
@@ -296,6 +305,8 @@ function Game() {
                     investigatablePlayers={investigatablePlayers}
                     handleDetectiveInvestigate={handleDetectiveInvestigate}
                     investigationResult={investigationResult}
+                    handleDetectiveReady={handleDetectiveReady}
+                    guessablePlayers={guessablePlayers}
                 />
 
                 <End
