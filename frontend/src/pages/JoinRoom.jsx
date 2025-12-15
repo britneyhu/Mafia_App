@@ -45,7 +45,11 @@ function JoinRoom() {
 
   return (
     <>
-      <Navbar />
+      <Navbar
+        phase={false}
+        navRoleVisible={false}
+        handleNavRoleReveal={false}
+      />
       <div className="flex flex-col gap-10 justify-center items-center mx-5">
         <div className="text-xl">
             Join Room Page

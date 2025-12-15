@@ -14,6 +14,7 @@ function Game() {
     const { roomCode } = useParams();
     const [phase, setPhase] = useState("role");
     const [role, setRole] = useState("");
+    const [navRoleVisible, setNavRoleVisible] = useState(false);
     const [roleVisible, setRoleVisible] = useState(false);
     const [numReady, setNumReady] = useState(0);
     const [errorMessage, setErrorMessage] = useState("");
@@ -199,6 +200,17 @@ function Game() {
         }
 
     }, []);
+    
+    {/* Nav Handlers */}
+    function handleNavRoleReveal() {
+        if(!navRoleVisible){
+            socket.emit("requestRole", roomCode);
+            setNavRoleVisible(true);
+        }
+        else{
+            setNavRoleVisible(false);
+        }
+    }
 
     {/* Role Phase Handlers */}
     function handleRoleReveal() {
@@ -248,7 +260,11 @@ function Game() {
 
     return(
         <>
-            <Navbar/>
+            <Navbar
+                phase={phase}
+                navRoleVisible={navRoleVisible}
+                handleNavRoleReveal={handleNavRoleReveal}
+            />
             <div className="flex flex-col gap-10 items-center mx-5">
                 <div className="text-xl">
                     Game Page

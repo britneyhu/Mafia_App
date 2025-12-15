@@ -7,11 +7,15 @@ function Home() {
   const navigate = useNavigate();
 
   return (
-    <>
-      <Navbar />
+    <div>
+      <Navbar
+        phase={false}
+        navRoleVisible={false}
+        handleNavRoleReveal={false}
+      />
       <Button onClick={()=>navigate("/create")}>Create Room</Button>
       <Button onClick={()=>navigate("/join")}>Join Room</Button>
-    </>
+    </div>
   );
 }
 

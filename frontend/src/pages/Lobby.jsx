@@ -41,7 +41,11 @@ function Lobby() {
 
     return (
         <>
-            <Navbar/>
+            <Navbar
+                phase={false}
+                navRoleVisible={false}
+                handleNavRoleReveal={false}
+            />
             <div className="flex flex-col gap-10 items-center mx-5">
                 <div className="text-xl">
                     Lobby Page
