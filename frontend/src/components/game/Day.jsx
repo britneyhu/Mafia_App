@@ -1,7 +1,6 @@
 import Button from "../Button";
 
-function Day({ phase, dayTime, numReady, alivePlayers, handleSkipDay, roundNumber }) {
-
+function Day({ phase, dayTime, numReady, alivePlayers, handleSkipDay, roundNumber, alive }) {
     function convertTime(dayTime) {
         const minutes = Math.floor(dayTime / 60);
         const seconds = dayTime % 60;
@@ -12,7 +11,7 @@ function Day({ phase, dayTime, numReady, alivePlayers, handleSkipDay, roundNumbe
     const readableTime = convertTime(dayTime);
 
     return(
-        <div className={phase === "dayPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
+        <div className={alive && phase === "dayPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
             <div className="flex flex-col justify-center items-center gap-10">
                 <div className="text-2xl font-semibold">Day {roundNumber}</div>
                 <div className="flex flex-col justify-center items-center">

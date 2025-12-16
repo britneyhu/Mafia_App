@@ -9,6 +9,7 @@ import Day from "../components/game/Day";
 import Vote from "../components/game/Vote";
 import Night from "../components/game/Night";
 import End from "../components/game/End";
+import Dead from "../components/game/Dead";
 
 function Game() {
     const { roomCode } = useParams();
@@ -282,11 +283,6 @@ function Game() {
                 name={name}
             />
             <div className="flex flex-col gap-10 items-center mx-5">
-
-                <div className={alive ? "hidden" : "flex"}>
-                    Spectating
-                </div>
-
                 <Role 
                     handleRoleReveal={handleRoleReveal}
                     roleVisible={roleVisible}
@@ -295,6 +291,7 @@ function Game() {
                     numReady={numReady}
                     alivePlayers={alivePlayers}
                     phase={phase}
+                    alive={alive}
                 />
 
                 <Day
@@ -304,6 +301,7 @@ function Game() {
                     alivePlayers={alivePlayers}
                     handleSkipDay={handleSkipDay}
                     roundNumber={roundNumber}
+                    alive={alive}
                 />
 
                 <Vote
@@ -316,6 +314,7 @@ function Game() {
                     votedOff={votedOff}
                     roundNumber={roundNumber}
                     skipTime={skipTime}
+                    alive={alive}
                 />
 
                 <Night
@@ -336,12 +335,19 @@ function Game() {
                     investigationResult={investigationResult}
                     handleDetectiveReady={handleDetectiveReady}
                     guessablePlayers={guessablePlayers}
+                    alive={alive}
                 />
 
                 <End
                     phase={phase}
                     winner={winner}
                     handleRestartGame={handleRestartGame}
+                    alive={alive}
+                />
+
+                <Dead
+                    alive={alive}
+                    phase={phase}
                 />
 
                 <div>{errorMessage}</div>

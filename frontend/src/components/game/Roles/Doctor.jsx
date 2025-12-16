@@ -1,21 +1,29 @@
 import Button from "../../Button";
+import { MdHealthAndSafety } from "react-icons/md";
 
 function Doctor({ role, savablePlayers, handleDoctorSave, numReady, alivePlayers }) {
     return (
-        <div className={role === "Doctor" ? "flex flex-col justify-center items-center" : "hidden"}>
-            <div>I am the Doctor</div>
-            <div>Pick Someone to Save</div>
+        <div className={role === "Doctor" ? "flex flex-col justify-center items-center gap-10" : "hidden"}>
+            <div className="flex flex-col w-full justify-center items-center">
+                <div className="text-xl">You are the Doctor</div>
+                <div className="text-xl">Pick Someone to Save</div>
+            </div>
 
-            <ul>
+            <ul className="self-start flex flex-col gap-5">
                 {savablePlayers.map(player => (
-                    <div key={player.id}>
-                        <Button key={player.id} onClick={()=>handleDoctorSave(player.name)}>{player.name}</Button>
+                    <div key={player.id} className="flex justify-center items-center gap-5">
+                        <Button key={player.id} onClick={()=>handleDoctorSave(player.name)} className="w-20">
+                            <MdHealthAndSafety className="size-7"/>
+                        </Button>
+                        <div className="text-xl">{player.name}</div>
                     </div>
                 ))}
-                <Button onClick={()=>handleDoctorSave("Skip")}>Skip</Button>
+                <Button onClick={()=>handleDoctorSave("Skip")} className="w-20">Skip</Button>
             </ul>
 
-            <div>{numReady + "/" + alivePlayers + " Ready"}</div>
+            <div className="flex justify-center items-center gap-5 fixed bottom-15 right-10">
+                <div>{numReady + "/" + alivePlayers} Ready</div>
+            </div>
         </div>
     )
 }

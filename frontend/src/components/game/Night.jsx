@@ -3,11 +3,11 @@ import Mafia from "./Roles/Mafia";
 import Doctor from "./Roles/Doctor";
 import Detective from "./Roles/Detective";
 
-function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], handleSurveySubmit, handleMafiaKill, killed, roundNumber, skipTime, savablePlayers, handleDoctorSave, investigatablePlayers, handleDetectiveInvestigate, investigationResult, handleDetectiveReady, guessablePlayers }) {
+function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], handleSurveySubmit, handleMafiaKill, killed, roundNumber, skipTime, savablePlayers, handleDoctorSave, investigatablePlayers, handleDetectiveInvestigate, investigationResult, handleDetectiveReady, guessablePlayers, alive }) {
     return(
         <div>
-            <div className={phase === "nightPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
-                <div>Night Phase Round {roundNumber}</div>
+            <div className={alive && phase === "nightPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
+                <div className="text-2xl font-semibold pb-10">Night {roundNumber}</div>
 
                 <Villager
                     role={role}
@@ -45,9 +45,11 @@ function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], hand
             </div>
 
             <div className={phase === "nightResultsPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
-                <div>Night Results Phase {roundNumber}</div>
-                <div>{killed} Was Killed Last Night</div>
-                <div>Advancing in {skipTime}</div>
+                <div className="text-4xl font-semibold">{killed}</div>
+                <div className="text-4xl font-semibold">Died Last Night</div>
+                <div className="flex justify-center items-center gap-5 fixed bottom-15 right-10">
+                    Auto Advance in {skipTime}
+                </div>
             </div>
 
         </div>
