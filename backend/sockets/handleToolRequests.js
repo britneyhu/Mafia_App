@@ -7,10 +7,16 @@ function handleToolRequests(socket, io) {
     });
 
     socket.on("requestName", (roomCode)=> {
-        const players = getPlayers(roomCode);
-        const player = players.find(p => p.id === socket.id);
-        const playerName = player.name;
-        socket.emit("playerName", playerName);
+        try{
+            const players = getPlayers(roomCode);
+            const player = players.find(p => p.id === socket.id);
+            const playerName = player.name;
+            socket.emit("playerName", playerName);
+        }
+        catch(err){
+            socket.emit("errorMessage", err.message);
+            console.error(err);
+        }
     })
 }
 
