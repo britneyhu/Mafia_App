@@ -11,6 +11,8 @@ function Lobby() {
     const [players, setPlayers] = useState([]);
     const [errorMessage, setErrorMessage] = useState("");
 
+    const displayedRoomCode = roomCode.toUpperCase();
+
     useEffect(()=>{
         socket.emit("requestPlayers", roomCode);
 
@@ -36,7 +38,6 @@ function Lobby() {
 
     function handleStartGame() {
         socket.emit("startGame", roomCode);
-
     }
 
     return (
@@ -45,19 +46,17 @@ function Lobby() {
                 phase={false}
                 navRoleVisible={false}
                 handleNavRoleReveal={false}
+                role={false}
+                name={false}
             />
             <div className="flex flex-col gap-10 items-center mx-5">
-                <div className="text-xl">
-                    Lobby Page
+                <div className="flex flex-col justify-center items-center gap-2">
+                    <p className="text-2xl font-semibold">Lobby</p>
+                    <p className="text-md">Code: {displayedRoomCode}</p>
                 </div>
 
-                <div className="text-xl">
-                    Room Code: {roomCode}
-                </div>
-
-                <div className="self-start">
-                    <p className="text-xl">Players</p>
-                    <ul className="list-disc list-inside p-4">
+                <div className="self-start pl-10">
+                    <ul className="list-disc list-inside p-4 text-2xl font-semibold">
                         {players.map((player)=>(
                             <li 
                                 key={player.id}

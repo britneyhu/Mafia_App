@@ -35,19 +35,15 @@ function CreateRoom() {
                 phase={false}
                 navRoleVisible={false}
                 handleNavRoleReveal={false}
+                role={false}
+                name={false}
             />
-            <div className="flex flex-col gap-10 items-center mx-5">
-                <div className="text-xl">
-                    Create Room Page
-                </div>
-                
-                <div className="self-start">
-                    <div>
+            <div className="flex flex-col gap-10 justify-center items-center mx-5">       
+                    <div className="flex flex-col gap-2">
                         <label>Name</label>
                         <InputField value={name} onChange={handleChange}/>
                     </div>
-                    <Button onClick={handleSubmit}>Create Room</Button>
-                </div>
+                    <Button onClick={handleSubmit} className="w-50">Create</Button>
             </div>
             
         </>

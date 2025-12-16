@@ -1,5 +1,5 @@
 function InputField({children, value, onChange, className}) {
-    const baseClassName = className + " border-2 p-4 m-5 h-4"
+    const baseClassName = className + " border-1 border-light-gray bg-gray rounded-lg w-70 p-1 px-2"
 
     return (
         <input 

@@ -12,6 +12,7 @@ import End from "../components/game/End";
 
 function Game() {
     const { roomCode } = useParams();
+    const [name, setName] = useState("");
     const [phase, setPhase] = useState("role");
     const [role, setRole] = useState("");
     const [navRoleVisible, setNavRoleVisible] = useState(false);
@@ -36,6 +37,7 @@ function Game() {
 
     useEffect(()=>{
         socket.emit("requestAlivePlayers", roomCode);
+        socket.emit("requestName", roomCode);
 
         {/* Role Phase Sockets */}
         socket.on("rolePhaseReadyStatus", (playersReady)=>{
@@ -165,6 +167,9 @@ function Game() {
         });
         socket.on("roundNumber", (number)=>{
             setRoundNumber(number);
+        });
+        socket.on("playerName", (playerName)=> {
+            setName(playerName);
         })
 
         
@@ -197,6 +202,15 @@ function Game() {
             socket.off("alivePlayers");
             socket.off("roleReveal");
             socket.off("errorMessage");
+            socket.off("skipTimer");
+            socket.off("guessablePlayers");
+            socket.off("savablePlayers");
+            socket.off("investigatablePlayers");
+            socket.off("investigationResult");
+            socket.off("nightResultsPhaseReady");
+            socket.off("gameRestarted");
+            socket.off("roundNumber");
+            socket.off("playerName")
         }
 
     }, []);
@@ -264,11 +278,10 @@ function Game() {
                 phase={phase}
                 navRoleVisible={navRoleVisible}
                 handleNavRoleReveal={handleNavRoleReveal}
+                role={role}
+                name={name}
             />
             <div className="flex flex-col gap-10 items-center mx-5">
-                <div className="text-xl">
-                    Game Page
-                </div>
 
                 <div className={alive ? "hidden" : "flex"}>
                     Spectating

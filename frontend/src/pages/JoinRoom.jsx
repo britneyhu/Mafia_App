@@ -49,25 +49,22 @@ function JoinRoom() {
         phase={false}
         navRoleVisible={false}
         handleNavRoleReveal={false}
+        role={false}
+        name={false}
       />
       <div className="flex flex-col gap-10 justify-center items-center mx-5">
-        <div className="text-xl">
-            Join Room Page
-        </div>
-        
-        <div className="self-start">
-            <div>
+  
+            <div className="flex flex-col gap-2">
                 <label>Name</label>
                 <InputField value={name} onChange={handleNameChange} />
             </div>
 
-            <div>
-                <label>Room Code</label>
+            <div className="flex flex-col gap-2">
+                <label>Code</label>
                 <InputField value={code} onChange={handleCodeChange} />
             </div>
 
-            <Button onClick={handleJoin}>Join</Button>
-        </div>
+            <Button onClick={handleJoin} className="w-50">Join</Button>
 
         <p>{errorMessage}</p>
         </div>
