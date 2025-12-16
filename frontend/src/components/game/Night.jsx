@@ -3,7 +3,11 @@ import Mafia from "./Roles/Mafia";
 import Doctor from "./Roles/Doctor";
 import Detective from "./Roles/Detective";
 
-function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], handleSurveySubmit, handleMafiaKill, killed, roundNumber, skipTime, savablePlayers, handleDoctorSave, investigatablePlayers, handleDetectiveInvestigate, investigationResult, handleDetectiveReady, guessablePlayers, alive }) {
+function Night({ 
+    phase, role, numReady, alivePlayers, killablePlayers = [], handleSurveySubmit, handleMafiaKill, killed, roundNumber, skipTime, savablePlayers, handleDoctorSave, 
+    investigatablePlayers, handleDetectiveInvestigate, investigationResult, handleDetectiveReady, guessablePlayers, alive, readyPressed, guessedPlayer, killedPlayer,
+    savedPlayer, investigatedPlayer, detectiveReadyPressed
+}) {
     return(
         <div>
             <div className={alive && phase === "nightPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
@@ -15,6 +19,8 @@ function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], hand
                     alivePlayers={alivePlayers}
                     handleSurveySubmit={handleSurveySubmit}
                     guessablePlayers={guessablePlayers}
+                    readyPressed={readyPressed}
+                    guessedPlayer={guessedPlayer}
                 />
 
                 <Mafia
@@ -23,6 +29,8 @@ function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], hand
                     alivePlayers={alivePlayers}
                     handleMafiaKill={handleMafiaKill}
                     killablePlayers={killablePlayers}
+                    readyPressed={readyPressed}
+                    killedPlayer={killedPlayer}
                 />
 
                 <Doctor
@@ -31,6 +39,8 @@ function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], hand
                     handleDoctorSave={handleDoctorSave}
                     numReady={numReady}
                     alivePlayers={alivePlayers}
+                    readyPressed={readyPressed}
+                    savedPlayer={savedPlayer}
                 />
 
                 <Detective
@@ -41,12 +51,17 @@ function Night({ phase, role, numReady, alivePlayers, killablePlayers = [], hand
                     alivePlayers={alivePlayers}
                     investigationResult={investigationResult}
                     handleDetectiveReady={handleDetectiveReady}
+                    readyPressed={readyPressed}
+                    investigatedPlayer={investigatedPlayer}
+                    detectiveReadyPressed={detectiveReadyPressed}
                 />
             </div>
 
-            <div className={phase === "nightResultsPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
-                <div className="text-4xl font-semibold">{killed}</div>
-                <div className="text-4xl font-semibold">Died Last Night</div>
+            <div className={alive && phase === "nightResultsPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
+                <div className="flex flex-col gap-2">
+                    <div className="text-4xl font-semibold">{killed}</div>
+                    <div className="text-4xl font-semibold">Died Last Night</div>
+                </div>
                 <div className="flex justify-center items-center gap-5 fixed bottom-15 right-10">
                     Auto Advance in {skipTime}
                 </div>

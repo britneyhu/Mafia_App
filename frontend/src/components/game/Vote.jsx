@@ -1,6 +1,6 @@
 import Button from "../Button";
 
-function Vote({ phase, votablePlayers, numReady, alivePlayers, handleVote, skipResults, votedOff, roundNumber, skipTime, alive }) {
+function Vote({ phase, votablePlayers, numReady, alivePlayers, handleVote, skipResults, votedOff, roundNumber, skipTime, alive, readyPressed, playerVote }) {
     function convertTime(skipTime) {
         const minutes = Math.floor(skipTime / 60);
         const seconds = skipTime % 60;
@@ -23,14 +23,14 @@ function Vote({ phase, votablePlayers, numReady, alivePlayers, handleVote, skipR
                     </div>
                 </div>
                 
-                <ul className="self-start flex flex-col gap-5">
+                <ul className="self-start items-start flex flex-col gap-5">
                     {votablePlayers.map(player => (
                         <div key={player.id} className="flex justify-center items-center gap-5">
-                            <Button key={player.id} onClick={()=>handleVote(player.name)} className="w-20">Vote</Button>
+                            <Button key={player.id} onClick={()=>handleVote(player.name)}  disabled={readyPressed} className={`w-20 ` + (playerVote === player.name && readyPressed ? "bg-linear-295 from-teal to-purple" : "")}>Vote</Button>
                             <div className="text-xl">{player.name}</div>
                         </div>
                     ))}
-                    <Button onClick={()=>handleVote("skip")} className="w-20">Skip</Button>
+                    <Button onClick={()=>handleVote("skip")} disabled={readyPressed} className={`w-20 ` + (playerVote === "skip" && readyPressed ? "bg-linear-295 from-teal to-purple" : "")}>Skip</Button>
                 </ul>
 
                 <div className="flex justify-center items-center gap-5 fixed bottom-15 right-10">
@@ -38,7 +38,7 @@ function Vote({ phase, votablePlayers, numReady, alivePlayers, handleVote, skipR
                 </div>
             </div>
 
-            <div className={phase === "voteResultsPhase" ? "flex flex-col justify-center items-center  gap-10" : "hidden"}>
+            <div className={alive && phase === "voteResultsPhase" ? "flex flex-col justify-center items-center  gap-10" : "hidden"}>
                 <div className="flex flex-col justify-center items-center gap-5">
                     <div className="text-2xl font-semibold">Vote {roundNumber} Results</div>
                     <div className="text-3xl font-semibold">{votedOff} Was Voted Off</div>

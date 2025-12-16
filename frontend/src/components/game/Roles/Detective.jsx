@@ -1,7 +1,7 @@
 import Button from "../../Button";
 import { MdPersonSearch } from "react-icons/md";
 
-function Doctor({ role, investigatablePlayers, handleDetectiveInvestigate, numReady, alivePlayers, investigationResult, handleDetectiveReady }) {
+function Doctor({ role, investigatablePlayers, handleDetectiveInvestigate, numReady, alivePlayers, investigationResult, handleDetectiveReady, readyPressed, investigatedPlayer, detectiveReadyPressed }) {
     return (
         <div className={role === "Detective" ? "flex flex-col justify-center items-center gap-10" : "hidden"}>
             <div className="flex flex-col w-full justify-center items-center">
@@ -9,10 +9,10 @@ function Doctor({ role, investigatablePlayers, handleDetectiveInvestigate, numRe
                 <div className="text-xl">Pick Someone to Investigate</div>
             </div>
 
-            <ul className="self-start flex flex-col gap-5">
+            <ul className="self-start items-start flex flex-col gap-5">
                 {investigatablePlayers.map(player => (
                     <div key={player.id} className="flex justify-center items-center gap-5">
-                        <Button key={player.id} onClick={()=>handleDetectiveInvestigate(player.name)} className="w-20">
+                        <Button key={player.id} onClick={()=>handleDetectiveInvestigate(player.name)} disabled={readyPressed} className={`w-20 ` + (investigatedPlayer === player.name && readyPressed ? "bg-linear-295 from-teal to-purple" : "")}>
                             <MdPersonSearch className="size-7"/>
                         </Button>
                         <div className="text-xl">{player.name}</div>
@@ -22,7 +22,7 @@ function Doctor({ role, investigatablePlayers, handleDetectiveInvestigate, numRe
 
             <div className="flex flex-col justify-center items-center gap-2">
                 <div>{investigationResult !== "none" && (investigationResult ? "They are Mafia" : "They are Innocent")}</div>
-                <Button className={investigationResult !== "none" ? "flex flex-col justify-center items-center" : "hidden"} onClick={handleDetectiveReady}>Continue</Button>
+                <Button className={investigationResult !== "none" ? "flex flex-col justify-center items-center " + (detectiveReadyPressed ? "bg-linear-295 from-teal to-purple" : "") : "hidden"} onClick={handleDetectiveReady}>Continue</Button>
             </div>
 
             <div className="flex justify-center items-center gap-5 fixed bottom-15 right-10">

@@ -4,7 +4,7 @@ import { MdGroups } from "react-icons/md";
 import { GiPlagueDoctorProfile } from "react-icons/gi";
 import { GiSherlockHolmes } from "react-icons/gi";
 
-function Role({ handleRoleReveal, roleVisible, role, handleRoleReady, numReady, alivePlayers, phase }) {
+function Role({ handleRoleReveal, roleVisible, role, handleRoleReady, numReady, alivePlayers, phase, readyPressed }) {
 
     return(
         <div className={phase === "role" ? "flex flex-col justify-center items-center gap-70 w-full px-5" : "hidden"}>
@@ -32,7 +32,7 @@ function Role({ handleRoleReveal, roleVisible, role, handleRoleReady, numReady, 
 
             <div className="flex justify-center items-center gap-5 fixed bottom-0 right-0 p-10">
                 <div>{numReady + "/" + alivePlayers}</div>
-                <Button onClick={handleRoleReady} className="w-30">Ready</Button>
+                <Button onClick={handleRoleReady} disabled={readyPressed} className={`w-30 ` + (readyPressed ? "bg-linear-295 from-teal to-purple" : "")}>Ready</Button>
             </div>
             
         </div>

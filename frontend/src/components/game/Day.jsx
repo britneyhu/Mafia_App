@@ -1,6 +1,6 @@
 import Button from "../Button";
 
-function Day({ phase, dayTime, numReady, alivePlayers, handleSkipDay, roundNumber, alive }) {
+function Day({ phase, dayTime, numReady, alivePlayers, handleSkipDay, roundNumber, alive, readyPressed }) {
     function convertTime(dayTime) {
         const minutes = Math.floor(dayTime / 60);
         const seconds = dayTime % 60;
@@ -26,7 +26,7 @@ function Day({ phase, dayTime, numReady, alivePlayers, handleSkipDay, roundNumbe
 
             <div className="flex justify-center items-center gap-5 fixed bottom-15 right-10">
                 <div>{numReady + "/" + alivePlayers}</div>
-                <Button onClick={handleSkipDay} className="w-30">Skip</Button>
+                <Button onClick={handleSkipDay} disabled={readyPressed} className={`w-30 ` + (readyPressed ? "bg-linear-295 from-teal to-purple" : "")}>Skip</Button>
             </div>
             
         </div>

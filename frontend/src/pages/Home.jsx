@@ -27,14 +27,14 @@ function Home() {
           Create Room
         </Button>
 
-        <Button 
+      <Button 
         onClick={()=>navigate("/join")} 
         className="flex justify-center items-center gap-8 bg-gray border-1 border-light-gray w-70">
           <div className="w-12 h-12 bg-linear-295 from-teal to-purple rounded-lg flex items-center justify-center">
             <TbDoorEnter className="size-7 text-black"/>
           </div>
           Join Room
-        </Button>
+      </Button>
     </div>
   );
 }

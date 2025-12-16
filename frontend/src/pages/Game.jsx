@@ -35,6 +35,13 @@ function Game() {
     const [investigatablePlayers, setInvestigatablePlayers] = useState([]);
     const [investigationResult, setInvestigationResult] = useState("none");
     const [guessablePlayers, setGuessablePlayers] = useState([]);
+    const [readyPressed, setReadyPressed] = useState(false);
+    const [playerVote, setPlayerVote] = useState("");
+    const [guessedPlayer, setGuessedPlayer] = useState("");
+    const [killedPlayer, setKilledPlayer] = useState("");
+    const [savedPlayer, setSavedPlayer] = useState("");
+    const [investigatedPlayer, setInvestigatedPlayer] = useState("");
+    const [detectiveReadyPressed, setDetectiveReadyPressed] = useState(false);
 
     useEffect(()=>{
         socket.emit("requestAlivePlayers", roomCode);
@@ -48,6 +55,7 @@ function Game() {
             setNumReady(0);
             socket.emit("dayPhase", roomCode, 180);
             setPhase("dayPhase");
+            setReadyPressed(false);
         })
 
 
@@ -65,6 +73,7 @@ function Game() {
             setSkipTime(60);
             socket.emit("votePhase", roomCode);
             setPhase("votePhase");
+            setReadyPressed(false);
         });
 
 
@@ -80,6 +89,8 @@ function Game() {
             setSkipTime(5);
             socket.emit("voteResultsPhase", roomCode);
             setPhase("voteResultsPhase");
+            setReadyPressed(false);
+            setPlayerVote("");
         });
 
 
@@ -128,6 +139,12 @@ function Game() {
             setInvestigationResult("none");
             socket.emit("nightResultsPhase", roomCode);
             setPhase("nightResultsPhase");
+            setReadyPressed(false);
+            setGuessedPlayer("");
+            setKilledPlayer("");
+            setSavedPlayer("");
+            setInvestigatedPlayer("");
+            setDetectiveReadyPressed(false);
         });
 
         {/* Night Results Phase Sockets */}
@@ -239,33 +256,47 @@ function Game() {
     }
     function handleRoleReady() {
         socket.emit("rolePhaseReady", roomCode);
+        setReadyPressed(true);
     }
 
     {/* Day Phase Handlers */}
     function handleSkipDay() {
         socket.emit("skipDay", roomCode);
+        setReadyPressed(true);
     }
 
     {/* Vote Phase Handlers */}
     function handleVote(voted) {
         socket.emit("vote", voted, roomCode);
+        setReadyPressed(true);
+        setPlayerVote(voted);
     }
 
     {/* Night Phase Handlers */}
     function handleSurveySubmit(answer) {
         socket.emit("surveySubmit", answer, roomCode);
+        setReadyPressed(true);
+        setGuessedPlayer(answer);
     }
     function handleMafiaKill(player) {
         socket.emit("mafiaKill", player, roomCode);
+        setReadyPressed(true);
+        setKilledPlayer(player);
     }
     function handleDoctorSave(player) {
         socket.emit("doctorSave", player, roomCode);
+        setReadyPressed(true);
+        setSavedPlayer(player);
     }
     function handleDetectiveInvestigate(player) {
         socket.emit("detectiveInvestigate", player, roomCode);
+        setReadyPressed(true);
+        setInvestigatedPlayer(player);
     }
     function handleDetectiveReady() {
         socket.emit("detectiveReady", roomCode);
+        setReadyPressed(true);
+        setDetectiveReadyPressed(true);
     }
 
     {/* End Phase Handlers */}
@@ -292,6 +323,7 @@ function Game() {
                     alivePlayers={alivePlayers}
                     phase={phase}
                     alive={alive}
+                    readyPressed={readyPressed}
                 />
 
                 <Day
@@ -302,6 +334,7 @@ function Game() {
                     handleSkipDay={handleSkipDay}
                     roundNumber={roundNumber}
                     alive={alive}
+                    readyPressed={readyPressed}
                 />
 
                 <Vote
@@ -315,6 +348,8 @@ function Game() {
                     roundNumber={roundNumber}
                     skipTime={skipTime}
                     alive={alive}
+                    readyPressed={readyPressed}
+                    playerVote={playerVote}
                 />
 
                 <Night
@@ -336,6 +371,12 @@ function Game() {
                     handleDetectiveReady={handleDetectiveReady}
                     guessablePlayers={guessablePlayers}
                     alive={alive}
+                    readyPressed={readyPressed}
+                    guessedPlayer={guessedPlayer}
+                    killedPlayer={killedPlayer}
+                    savedPlayer={savedPlayer}
+                    investigatedPlayer={investigatedPlayer}
+                    detectiveReadyPressed={detectiveReadyPressed}
                 />
 
                 <End
