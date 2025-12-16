@@ -4,7 +4,8 @@ function handleJoinRoom(socket, io) {
     socket.on("joinRoom", ({name, roomCode})=>{
         try{
             const trimmedName = name.trim();
-            joinRoom(trimmedName, roomCode, socket.id);
+            const trimmedRoomCode = roomCode.trim().toUpperCase();
+            joinRoom(trimmedName, trimmedRoomCode, socket.id);
 
             socket.playerName = name;
             socket.join(roomCode);
