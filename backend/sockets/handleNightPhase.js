@@ -5,7 +5,7 @@ const {
     setCurrentInvestigate, resetCurrentInvestigate,
 } = require("../rooms");
 
-const roomTimers = {};
+const nightPhaseTimers = {};
 
 function handleNightPhase(socket, io) {
     //When night phase starts, send role, alive players, and killable players
@@ -226,7 +226,7 @@ function handleNightPhase(socket, io) {
 
                 if(timeLeft === 0){
                     clearInterval(interval);
-                    delete roomTimers[roomCode];
+                    delete nightPhaseTimers[roomCode];
 
                     const roundNumber = setRoundNumber(roomCode);
                     io.to(roomCode).emit("roundNumber", roundNumber);
@@ -247,7 +247,7 @@ function handleNightPhase(socket, io) {
                     }
             }, 1000);
 
-            roomTimers[roomCode] = interval;
+            nightPhaseTimers[roomCode] = interval;
         }
         catch(err){
             socket.emit("errorMessage", err.message);

@@ -1,6 +1,6 @@
 const { getPlayers, getAlivePlayers, setDayPhaseReady, resetDayPhaseReady } = require("../rooms");
 
-const roomTimers = {};
+const dayPhaseTimers = {};
 
 function handleDayPhase(socket, io) {
     //When day phase starts, send alive players, start timer
@@ -8,8 +8,8 @@ function handleDayPhase(socket, io) {
         const alivePlayers = getAlivePlayers(roomCode);
         io.to(roomCode).emit("alivePlayers", alivePlayers.length);
 
-        if(roomTimers[roomCode]) {
-            clearInterval(roomTimers[roomCode]);
+        if(dayPhaseTimers[roomCode]) {
+            clearInterval(dayPhaseTimers[roomCode]);
         }
 
         let timeLeft = duration+1;
@@ -21,13 +21,13 @@ function handleDayPhase(socket, io) {
             if(timeLeft === 0){
 
                 clearInterval(interval);
-                delete roomTimers[roomCode];
+                delete dayPhaseTimers[roomCode];
 
                 io.to(roomCode).emit("dayPhaseAllReady", "votePhase");
             }
         }, 1000);
 
-        roomTimers[roomCode] = interval;
+        dayPhaseTimers[roomCode] = interval;
     });
 
     //When a player presses skip, set them as ready, then update everyone on who is ready
@@ -45,9 +45,9 @@ function handleDayPhase(socket, io) {
             const alivePlayers = getAlivePlayers(roomCode);
 
             if(playersReady.length === alivePlayers.length){
-                if(roomTimers[roomCode]){
-                    clearInterval(roomTimers[roomCode]);
-                    delete roomTimers[roomCode];
+                if(dayPhaseTimers[roomCode]){
+                    clearInterval(dayPhaseTimers[roomCode]);
+                    delete dayPhaseTimers[roomCode];
                 }
                 
                 io.to(roomCode).emit("dayPhaseAllReady", "votePhase");
