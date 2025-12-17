@@ -3,9 +3,9 @@ const handleJoinRoom = require("./handleJoinRoom");
 const handleToolRequests = require("./handleToolRequests");
 const handleStartGame = require("./handleStartGame");
 const handleRolePhase = require("./handleRolePhase");
-const handleDayPhase = require("./handleDayPhase");
-const handleVotePhase = require("./handleVotePhase");
-const handleNightPhase = require("./handleNightPhase");
+const {handleDayPhase} = require("./handleDayPhase");
+const {handleVotePhase} = require("./handleVotePhase");
+const {handleNightPhase} = require("./handleNightPhase");
 const handleEndPhase = require("./handleEndPhase");
 
 function setupSocket(io) {
