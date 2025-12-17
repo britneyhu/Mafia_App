@@ -57,12 +57,12 @@ function Night({
                 />
             </div>
 
-            <div className={alive && phase === "nightResultsPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
+            <div className={alive && phase === "nightResultsPhase" ? "flex flex-col justify-center items-center gap-20" : "hidden"}>
                 <div className="flex flex-col gap-2 justify-center items-center">
                     <div className="text-4xl font-semibold">{killed}</div>
                     <div className="text-4xl font-semibold">Died Last Night</div>
                 </div>
-                <div className="flex justify-center items-center gap-5 fixed bottom-15 right-10">
+                <div className="flex self-end justify-center items-center gap-5">
                     Auto Advance in {skipTime}
                 </div>
             </div>

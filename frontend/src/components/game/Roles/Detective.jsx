@@ -25,7 +25,7 @@ function Doctor({ role, investigatablePlayers, handleDetectiveInvestigate, numRe
                 <Button className={investigationResult !== "none" ? "flex flex-col justify-center items-center " + (detectiveReadyPressed ? "bg-linear-295 from-teal to-purple" : "") : "hidden"} onClick={handleDetectiveReady}>Continue</Button>
             </div>
 
-            <div className="flex justify-center items-center gap-5 fixed bottom-15 right-10">
+            <div className="flex self-end justify-center items-center gap-5">
                 <div>{numReady + "/" + alivePlayers} Ready</div>
             </div>
         </div>

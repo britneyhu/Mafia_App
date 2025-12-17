@@ -13,7 +13,7 @@ function Vote({ phase, votablePlayers, numReady, alivePlayers, handleVote, skipR
     return(
         <div className={alive && phase === "votePhase" || phase === "voteResultsPhase" ? "flex" : "hidden"}>
 
-            <div className={phase === "votePhase" ? "flex flex-col justify-center items-center gap-10" : "hidden"}>
+            <div className={phase === "votePhase" ? "flex flex-col justify-center items-center gap-20" : "hidden"}>
                 <div className="flex flex-col justify-center items-center gap-5">
                     <div className="text-2xl font-semibold">Vote {roundNumber}</div>
 
@@ -33,12 +33,12 @@ function Vote({ phase, votablePlayers, numReady, alivePlayers, handleVote, skipR
                     <Button onClick={()=>handleVote("skip")} disabled={readyPressed} className={`w-20 ` + (playerVote === "skip" && readyPressed ? "bg-linear-295 from-teal to-purple" : "")}>Skip</Button>
                 </ul>
 
-                <div className="flex justify-center items-center gap-5 fixed bottom-15 right-10">
+                <div className="flex self-end justify-center items-center gap-5">
                     <div>{numReady + "/" + alivePlayers} Ready</div>
                 </div>
             </div>
 
-            <div className={alive && phase === "voteResultsPhase" ? "flex flex-col justify-center items-center  gap-10" : "hidden"}>
+            <div className={alive && phase === "voteResultsPhase" ? "flex flex-col justify-center items-center  gap-20" : "hidden"}>
                 <div className="flex flex-col justify-center items-center gap-5">
                     <div className="text-2xl font-semibold">Vote {roundNumber} Results</div>
                     <div className="text-3xl font-semibold">{votedOff} Was Voted Off</div>
@@ -72,7 +72,7 @@ function Vote({ phase, votablePlayers, numReady, alivePlayers, handleVote, skipR
 
                 
 
-                <div className="flex justify-center items-center gap-5 fixed bottom-15 right-10">
+                <div className="flex self-end justify-center items-center gap-5">
                     Auto Advance in {skipTime}
                 </div>
             </div>   

@@ -21,7 +21,7 @@ function Doctor({ role, savablePlayers, handleDoctorSave, numReady, alivePlayers
                 <Button onClick={()=>handleDoctorSave("Skip")} disabled={readyPressed} className={`w-20 ` + (savedPlayer === "Skip" && readyPressed ? "bg-linear-295 from-teal to-purple" : "")}>Skip</Button>
             </ul>
 
-            <div className="flex justify-center items-center gap-5 fixed bottom-15 right-10">
+            <div className="flex self-end justify-center items-center gap-5">
                 <div>{numReady + "/" + alivePlayers} Ready</div>
             </div>
         </div>
