@@ -170,6 +170,9 @@ function Game() {
             setRoundNumber(1);
             setPhase("role");
             setRoleVisible(false);
+            setAlive(true);
+            setDayTime(180);
+            setSkipTime(5);
         })
 
 

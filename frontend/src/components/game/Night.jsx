@@ -58,7 +58,7 @@ function Night({
             </div>
 
             <div className={alive && phase === "nightResultsPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 justify-center items-center">
                     <div className="text-4xl font-semibold">{killed}</div>
                     <div className="text-4xl font-semibold">Died Last Night</div>
                 </div>
