@@ -8,12 +8,12 @@ function handleJoinRoom(socket, io) {
             joinRoom(trimmedName, trimmedRoomCode, socket.id);
 
             socket.playerName = name;
-            socket.join(roomCode);
-            socket.emit("roomJoined", roomCode);
+            socket.join(trimmedRoomCode);
+            socket.emit("roomJoined", trimmedRoomCode);
             
-            io.to(roomCode).emit("roomPlayers", getPlayers(roomCode));
+            io.to(trimmedRoomCode).emit("roomPlayers", getPlayers(trimmedRoomCode));
 
-            console.log(`${socket.playerName} joined room: ${roomCode}`);
+            console.log(`${socket.playerName} joined room: ${trimmedRoomCode}`);
         }
         catch(err){
             socket.emit("errorMessage", err.message);
