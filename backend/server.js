@@ -7,13 +7,13 @@ const setupSocket = require("./sockets/setupSocket");
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: { origin: "https://playmaifa.netlify.app/" }
+    cors: { origin: "https://playmaifa.netlify.app" }
 });
 
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-    origin: "https://playmaifa.netlify.app/",
+    origin: "https://playmaifa.netlify.app",
     methods: ["GET", "POST"]
 }));
 
