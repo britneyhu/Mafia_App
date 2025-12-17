@@ -52,7 +52,7 @@ function handleVotePhase(socket, io) {
             //Check if player voted already
             const players = getPlayers(roomCode);
             const voterObject = players.find(p => p.id === socket.id);
-            if(voterObject.votePhaseReady) throw new Error(`voter already voted`);
+            if(voterObject.votePhaseReady) throw new Error(`Player already voted`);
             
             if(voted === "skip"){
                 if(!roomSkips[roomCode]){

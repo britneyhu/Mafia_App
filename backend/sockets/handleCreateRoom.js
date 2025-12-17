@@ -15,6 +15,9 @@ function handleCreateRoom(socket, io) {
             socket.emit("errorMessage", err.message);
 
             console.error(err);
+            setTimeout(()=> {
+                socket.emit("errorMessage", "");
+            }, 3000);
         }
         
     });

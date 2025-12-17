@@ -15,6 +15,10 @@ function handleToolRequests(socket, io) {
         }
         catch(err){
             socket.emit("errorMessage", err.message);
+            setTimeout(()=> {
+                socket.emit("errorMessage", "");
+            }, 3000);
+            
             console.error(err);
         }
     })

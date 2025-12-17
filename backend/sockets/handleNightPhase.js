@@ -35,7 +35,7 @@ function handleNightPhase(socket, io) {
             //Check if player submitted already
             const players = getPlayers(roomCode);
             const playerObject = players.find(p => p.id === socket.id);
-            if(playerObject.nightPhaseReady) throw new Error(`Player already submitted`);
+            if(playerObject.nightPhaseReady) throw new Error(`Player submitted already`);
 
             setSurvey(roomCode, answer, socket.id);
 
@@ -66,7 +66,7 @@ function handleNightPhase(socket, io) {
             //Check if player killed already
             const players = getPlayers(roomCode);
             const playerObject = players.find(p => p.id === socket.id);
-            if(playerObject.nightPhaseReady) throw new Error(`Player already killed`);
+            if(playerObject.nightPhaseReady) throw new Error(`Player killed already`);
 
             if(kill !== "Skip") setCurrentKill(roomCode, kill, socket.id);
 
@@ -96,7 +96,7 @@ function handleNightPhase(socket, io) {
             const players = getPlayers(roomCode);
             const playerObject = players.find(p => p.id === socket.id);
             const gameData = getGameData(roomCode);
-            if(playerObject.nightPhaseReady) throw new Error(`Player already saved`);
+            if(playerObject.nightPhaseReady) throw new Error(`Player saved already`);
             if(gameData.previouslySaved === save) throw new Error(`Can't save the same player 2 nights in a row`);
 
             if(save !== "Skip"){
@@ -162,7 +162,7 @@ function handleNightPhase(socket, io) {
             //Check if player investigated already
             const players = getPlayers(roomCode);
             const playerObject = players.find(p => p.id === socket.id);
-            if(playerObject.nightPhaseReady) throw new Error(`Player already ready`);
+            if(playerObject.nightPhaseReady) throw new Error(`Player ready already`);
 
             const playersReady = setNightPhaseReady(roomCode, socket.id);
             io.to(roomCode).emit("nightPhaseReadyStatus", playersReady);

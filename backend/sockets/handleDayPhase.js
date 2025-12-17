@@ -37,7 +37,7 @@ function handleDayPhase(socket, io) {
             //Check if player pressed skip already
             const players = getPlayers(roomCode);
             const playerObject = players.find(p => p.id === socket.id);
-            if(playerObject.dayPhaseReady) throw new Error(`Player Skipped Already`);
+            if(playerObject.dayPhaseReady) throw new Error(`Player skipped already`);
 
             const playersReady = setDayPhaseReady(roomCode, socket.id);
             io.to(roomCode).emit("dayPhaseReadyStatus", playersReady);

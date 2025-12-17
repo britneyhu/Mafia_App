@@ -7,7 +7,7 @@ function handleRolePhase(socket, io) {
             const players = getPlayers(roomCode);
             const player = players.find(player => player.id === socket.id);
 
-            if(!player) throw new Error("Player Id Not Found");
+            if(!player) throw new Error("Player id not found");
             socket.emit("roleReveal", player.role);
         }
         catch(err){
@@ -28,7 +28,7 @@ function handleRolePhase(socket, io) {
             //Check if player has pressed ready already
             const players = getPlayers(roomCode);
             const playerObject = players.find(p => p.id === socket.id);
-            if(playerObject.rolePhaseReady) throw new Error(`Player Pressed Ready Already`);
+            if(playerObject.rolePhaseReady) throw new Error(`Player already ready`);
 
             const playersReady = setRolePhaseReady(roomCode, socket.id);
             io.to(roomCode).emit("rolePhaseReadyStatus", playersReady);

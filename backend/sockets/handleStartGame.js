@@ -4,7 +4,7 @@ function handleStartGame(socket, io) {
     socket.on("startGame", (roomCode)=>{
         try{
             const players = getPlayers(roomCode);
-            if(players.length < 4) throw new Error("Need 4 Players To Start");
+            if(players.length < 4) throw new Error("Need 4 players to start");
             assignRoles(roomCode); 
             io.to(roomCode).emit("gameStart");
             
