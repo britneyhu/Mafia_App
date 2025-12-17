@@ -11,7 +11,7 @@ function Day({ phase, dayTime, numReady, alivePlayers, handleSkipDay, roundNumbe
     const readableTime = convertTime(dayTime);
 
     return(
-        <div className={alive && phase === "dayPhase" ? "flex flex-col justify-center items-center" : "hidden"}>
+        <div className={alive && phase === "dayPhase" ? "flex flex-col justify-center items-center gap-20" : "hidden"}>
             <div className="flex flex-col justify-center items-center gap-10">
                 <div className="text-2xl font-semibold">Day {roundNumber}</div>
                 <div className="flex flex-col justify-center items-center">
@@ -24,7 +24,7 @@ function Day({ phase, dayTime, numReady, alivePlayers, handleSkipDay, roundNumbe
                 </div>
             </div>
 
-            <div className="flex justify-center items-center gap-5 fixed bottom-15 right-10">
+            <div className="flex self-end justify-center items-center gap-5">
                 <div>{numReady + "/" + alivePlayers}</div>
                 <Button onClick={handleSkipDay} disabled={readyPressed} className={`w-30 ` + (readyPressed ? "bg-linear-295 from-teal to-purple" : "")}>Skip</Button>
             </div>
