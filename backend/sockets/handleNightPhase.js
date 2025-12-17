@@ -260,4 +260,4 @@ function handleNightPhase(socket, io) {
     });
 }
 
-module.exports = {handleNightPhase, nightphaseTimers};
+module.exports = {handleNightPhase, nightPhaseTimers};
