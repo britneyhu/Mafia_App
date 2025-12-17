@@ -7,19 +7,19 @@ function handleEndPhase(socket, io) {
     socket.on("restartGame", (roomCode)=> {
         resetRoom(roomCode);
         assignRoles(roomCode);
-        if (dayPhaseTimers[roomCode]) {
+        if (dayPhaseTimers && dayPhaseTimers[roomCode]) {
             clearInterval(dayPhaseTimers[roomCode]);
             delete dayPhaseTimers[roomCode];
         }
-        if (nightPhaseTimers[roomCode]) {
+        if (nightPhaseTimers && nightPhaseTimers[roomCode]) {
             clearInterval(nightPhaseTimers[roomCode]);
             delete nightPhaseTimers[roomCode];
         }
-        if (votePhaseTimers[roomCode]) {
+        if (votePhaseTimers && votePhaseTimers[roomCode]) {
             clearInterval(votePhaseTimers[roomCode]);
             delete votePhaseTimers[roomCode];
         }
-        if (voteResultsPhaseTimers[roomCode]) {
+        if (voteResultsPhaseTimers && voteResultsPhaseTimers[roomCode]) {
             clearInterval(voteResultsPhaseTimers[roomCode]);
             delete voteResultsPhaseTimers[roomCode];
         }
