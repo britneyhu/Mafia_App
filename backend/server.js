@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const http = require("http");
 const { Server } = require("socket.io");
 const setupSocket = require("./sockets/setupSocket");
@@ -10,6 +11,11 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 3000;
+
+// app.use(cors({
+//     origin: "https://mafia-app.fly.dev/",
+//     methods: ["GET", "POST"]
+// }));
 
 app.get("/", (req, res)=>{
     res.send("Server is running");
