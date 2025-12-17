@@ -65,4 +65,4 @@ function handleDayPhase(socket, io) {
     });
 }
 
-module.exports = handleDayPhase;
+module.exports = {handleDayPhase, dayPhaseTimers};

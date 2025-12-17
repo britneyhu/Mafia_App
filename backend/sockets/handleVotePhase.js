@@ -154,4 +154,4 @@ function handleVotePhase(socket, io) {
     });
 }
 
-module.exports = handleVotePhase;
+module.exports = {handleVotePhase, votePhaseTimers, voteResultsPhaseTimers};
